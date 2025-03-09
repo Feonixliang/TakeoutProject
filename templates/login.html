@@ -154,7 +154,7 @@
                 if(username.includes('rider')) role = 'rider';
                 if(username.includes('merchant')) role = 'merchant';
 
-                window.location.href = `/get/${role}System?user=${encodeURIComponent(username)}`;
+                window.location.href = `/system/${role}?user=${encodeURIComponent(username)}`;
             }
         });
     </script>
