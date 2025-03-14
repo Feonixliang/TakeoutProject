@@ -1,10 +1,10 @@
-<!-- index.html 登录首页 -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>外卖系统登录</title>
+    <title>外卖系统注册</title>
     <style>
         * {
             margin: 0;
@@ -21,7 +21,7 @@
             align-items: center;
         }
 
-        .login-container {
+        .register-container {
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 20px;
@@ -49,56 +49,22 @@
             font-weight: 600;
         }
 
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #4a90e2;
-            outline: none;
-        }
-
-        .btn-login {
+        .btn-register {
             background: #4a90e2;
             color: white;
             width: 100%;
             padding: 14px;
             border: none;
             border-radius: 8px;
+            margin-top: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s ease;
         }
 
-        .btn-login:hover {
+        .btn-register:hover {
             background: #357abd;
-        }
-
-        .links {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .links a {
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
-
-        .links a:hover {
-            color: #4a90e2;
         }
 
         @keyframes slideIn {
@@ -113,7 +79,7 @@
         }
 
         @media (max-width: 480px) {
-            .login-container {
+            .register-container {
                 padding: 30px 20px;
             }
 
@@ -136,7 +102,6 @@
             z-index: 1000; /* 确保有足够的层叠上下文来保持在其他内容之上 */
         }
 
-
         .user-menu {
             display: flex;
             gap: 20px;
@@ -154,51 +119,28 @@
 </head>
 <body>
 
-    <div class="top-nav">
-            <nav class="user-menu">
-                <a href="/register/choose" class="user-btn">注册</a>
-            </nav>
+<div class="top-nav">
+    <nav class="user-menu">
+        <a href="/login" class="user-btn">登录</a>
+    </nav>
+</div>
+
+<div class="register-container">
+    <div class="logo">
+        <img src="{% static 'img/hamburger.png' %}?v=1}" alt="外卖logo">
     </div>
+    <h1>欢迎注册外卖系统</h1>
 
-    <div class="login-container">
-        <div class="logo">
-            <img src="/static/hamburger.png" alt="外卖logo">
-        </div>
-        <h1>欢迎登录外卖系统</h1>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="用户名" required>
-            </div>
-
-            <div class="form-group">
-                <input type="password" class="form-control" placeholder="密码" required>
-            </div>
-
-            <button type="submit" class="btn-login">登 录</button>
-        </form>
+    <div class="form-group">
+        <button type="submit" class="btn-register" onclick="window.location.href='/register/customer'">作为顾客注册</button>
     </div>
+    <div class="form-group">
+        <button type="submit" class="btn-register" onclick="window.location.href='/register/merchant'">作为商家注册</button>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn-register" onclick="window.location.href='/register/rider'">作为骑手注册</button>
+    </div>
+</div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = this.querySelector('input[type="text"]').value;
-            const password = this.querySelector('input[type="password"]').value;
-
-            if(username && password) {
-                let role = 'customer';
-                if(username.includes('rider')) role = 'rider';
-                if(username.includes('merchant')) role = 'merchant';
-
-                window.location.href = `/system/${role}?user=${encodeURIComponent(username)}`;
-            }
-        });
-    </script>
 </body>
 </html>
-
-
-
-
-
-
