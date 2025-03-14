@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顾客注册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4a90e2, #63b8ff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(-20px);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .btn-register {
+            background: #4a90e2;
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-register:hover {
+            background: #357abd;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #4a90e2;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        .top-nav {
+            background: #1976D2;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 30px;
+            position: fixed; /* 确保此属性存在 */
+            top: 0; /* 添加此行以明确指定顶部位置为0 */
+            left: 0; /* 如果希望导航栏从屏幕最左边开始，则添加此行 */
+            right: 0; /* 或者如果您想让导航栏横跨整个屏幕宽度，则使用right: 0; 而不是width属性 */
+            z-index: 1000; /* 确保有足够的层叠上下文来保持在其他内容之上 */
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .user-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <nav class="user-menu">
+        <a href="/login" class="user-btn">登录</a>
+    </nav>
+</div>
+
+<div class="register-container">
+    <div class="logo">
+        <img src="/static/hamburger.png" alt="外卖logo">
+    </div>
+    <h1>欢迎注册外卖系统 - 顾客</h1>
+
+    <form method="post" id="registerForm">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="用户名" required>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="账户" required>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="密码" required>
+        </div>
+        <div class="form-group">
+            <input type="tel" class="form-control" placeholder="手机号" required>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="地址" required>
+        </div>
+        <button type="submit" class="btn-register">注册</button>
+    </form>
+
+    <div class="links">
+        <p>已有账号？<a href="/login">立即登录</a></p>
+    </div>
+</div>
+
+</body>
+</html>

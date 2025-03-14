@@ -1,0 +1,213 @@
+<!-- customer.html 顾客系统完整代码 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美食广场</title>
+    <style>
+        /* 包含与骑手系统相同的共用样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '微软雅黑', sans-serif;
+        }
+
+        /* 整体布局 */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左侧导航栏 */
+        .sidebar {
+            width: 240px;
+            background: #1A237E;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            transition: 0.3s;
+        }
+
+        .logo {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 15px 0;
+        }
+
+        .nav-link {
+            color: #E8EAF6;
+            text-decoration: none;
+            padding: 12px;
+            display: block;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            background: #303F9F;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background: #1976D2;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 30px;
+            position: fixed;
+            width: calc(100% - 240px);
+            left: 240px;
+            transition: 0.3s;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .user-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .user-btn:hover {
+            background: #1565C0;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 60px;
+            padding: 30px;
+            background: #E3F2FD;
+            min-height: calc(100vh - 60px);
+            width: calc(100% - 240px);
+            transition: 0.3s;
+        }
+
+        .order-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            height: 300px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                z-index: 100;
+            }
+            .sidebar.active {
+                width: 240px;
+            }
+            .top-nav {
+                width: 100%;
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+        /* 新增顾客系统专属样式 */
+        .restaurant-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-sidebar {
+            position: fixed;
+            right: 0;
+            top: 60px;
+            width: 300px;
+            background: white;
+            padding: 20px;
+            height: calc(100vh - 60px);
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-toggle">☰</div>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">美食广场</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#" class="nav-link">首页</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">订单</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">收藏</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">地址管理</a></li>
+            </ul>
+        </nav>
+
+        <div class="top-nav">
+            <nav class="user-menu">
+                <span class="user-btn">欢迎，用户_美食家</span>
+                <a href="/login" class="user-btn">退出</a>
+            </nav>
+        </div>
+
+        <main class="main-content">
+            <div class="restaurant-card">
+                <div>
+                    <h3>川味小厨</h3>
+                    <p>⭐4.8 月售1000+</p>
+                    <p>人均 ¥35</p>
+                </div>
+                <button class="user-btn">进店</button>
+            </div>
+        </main>
+
+        <div class="cart-sidebar">
+            <h3>购物车</h3>
+            <div class="menu-item">
+                <span>水煮鱼 x1</span>
+                <span>¥58</span>
+            </div>
+            <button class="user-btn" style="width:100%;margin-top:20px;">去结算</button>
+        </div>
+    </div>
+
+    <script>
+        // 共用脚本
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
