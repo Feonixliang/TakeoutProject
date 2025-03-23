@@ -1,4 +1,3 @@
-<!-- rider.html 骑手系统完整代码 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>骑手工作台</title>
     <style>
+        /* 基础样式 */
+        :root {
+            --sidebar-width: 240px;
+            --primary-color: #1A237E;
+            --secondary-color: #1976D2;
+            --hover-color: #303F9F;
+            --text-light: #E8EAF6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,93 +21,101 @@
             font-family: '微软雅黑', sans-serif;
         }
 
-        /* 整体布局 */
+        /* 布局容器 */
         .container {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* 左侧导航栏 */
+        /* 侧边栏样式 */
         .sidebar {
-            width: 240px;
-            background: #1A237E;
-            padding: 20px;
+            width: var(--sidebar-width);
+            background: var(--primary-color);
             position: fixed;
             height: 100%;
-            transition: 0.3s;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
         }
 
         .logo {
             color: white;
             font-size: 24px;
-            margin-bottom: 40px;
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .nav-menu {
             list-style: none;
-        }
-
-        .nav-item {
-            margin: 15px 0;
+            padding: 20px;
         }
 
         .nav-link {
-            color: #E8EAF6;
+            color: var(--text-light);
             text-decoration: none;
             padding: 12px;
             display: block;
             border-radius: 6px;
-            transition: 0.3s;
+            transition: background 0.3s ease;
         }
 
-        .nav-link:hover {
-            background: #303F9F;
+        .nav-link:hover,
+        .nav-link:focus {
+            background: var(--hover-color);
+            outline: none;
         }
 
-        /* 顶部导航栏 */
+        /* 顶部导航 */
         .top-nav {
-            background: #1976D2;
+            background: var(--secondary-color);
             height: 60px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding: 0 30px;
             position: fixed;
-            width: calc(100% - 240px);
-            left: 240px;
-            transition: 0.3s;
-        }
-
-        .user-menu {
-            display: flex;
-            gap: 20px;
-        }
-
-        .user-btn {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .user-btn:hover {
-            background: #1565C0;
+            width: calc(100% - var(--sidebar-width));
+            left: var(--sidebar-width);
+            z-index: 999;
+            transition: all 0.3s ease;
         }
 
         /* 主内容区域 */
         .main-content {
-            margin-left: 240px;
-            margin-top: 60px;
-            padding: 30px;
-            background: #E3F2FD;
-            min-height: calc(100vh - 60px);
-            width: calc(100% - 240px);
-            transition: 0.3s;
+            margin-left: var(--sidebar-width);
+            padding: 90px 30px 30px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .top-nav {
+                width: 100%;
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* 公共组件样式 */
         .order-card {
             background: white;
             padding: 20px;
@@ -115,29 +131,63 @@
             margin: 15px 0;
         }
 
+        .user-btn {
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .user-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            cursor: pointer;
+            font-size: 24px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;
+            display: none;
+        }
+
         @media (max-width: 768px) {
-            .sidebar {
-                width: 0;
-                z-index: 100;
+            .menu-toggle {
+                display: block;
             }
-            .sidebar.active {
-                width: 240px;
-            }
-            .top-nav {
-                width: 100%;
-                left: 0;
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
+        }
+
+        /* 遮罩层 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar.active + .sidebar-overlay {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="menu-toggle">☰</div>
+    <button class="menu-toggle" aria-label="切换菜单">☰</button>
+
     <div class="container">
-        <nav class="sidebar">
+        <nav class="sidebar" aria-label="主菜单">
             <div class="logo">骑手中心</div>
             <ul class="nav-menu">
                 <li class="nav-item"><a href="#" class="nav-link">待接订单</a></li>
@@ -146,28 +196,61 @@
             </ul>
         </nav>
 
-        <div class="top-nav">
-            <nav class="user-menu">
+        <div class="sidebar-overlay"></div>
+
+        <header class="top-nav">
+            <nav class="user-menu" aria-label="用户菜单">
                 <span class="user-btn">骑手ID：R1234</span>
                 <a href="/login" class="user-btn">退出</a>
             </nav>
-        </div>
+        </header>
 
-        <main class="main-content">
+        <main class="main-content" aria-label="主要内容">
             <div class="order-card">
                 <h3>订单号：OD20230928001</h3>
                 <p>商家地址：人民路123号</p>
                 <p>客户地址：中山路456号</p>
-                <div class="map-container"></div>
+                <div class="map-container" role="region" aria-label="地图区域"></div>
                 <button class="user-btn" style="margin-top:10px;">确认接单</button>
             </div>
         </main>
     </div>
 
     <script>
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
+        (function() {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            // 切换侧边栏
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('no-scroll');
+            }
+
+            // 窗口调整时自动关闭侧边栏
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                }
+            }
+
+            // 点击遮罩层关闭侧边栏
+            function closeSidebar(e) {
+                if (e.target === overlay) {
+                    toggleSidebar();
+                }
+            }
+
+            // 事件监听
+            menuToggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', handleResize);
+
+            // 初始化检查
+            handleResize();
+        })();
     </script>
 </body>
 </html>

@@ -163,38 +163,58 @@
 
     <div class="login-container">
         <div class="logo">
-            <img src="{% static 'img/hamburger.png' %}?v=1}" alt="外卖logo">
+            <!-- 修正图片路径中的多余字符 -->
+            <img src="{% static 'img/hamburger.png' %}?v=1" alt="外卖logo">
         </div>
         <h1>欢迎登录外卖系统</h1>
 
-        <form id="loginForm">
+        <form id="loginForm" onsubmit="return false;">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="用户名" required>
+                <input type="text" id="username" class="form-control" placeholder="用户名" required>
             </div>
 
             <div class="form-group">
-                <input type="password" class="form-control" placeholder="密码" required>
+                <input type="password" id="password" class="form-control" placeholder="密码" required>
             </div>
 
-            <button type="submit" class="btn-login">登 录</button>
+            <button class="btn-login" onclick="doLogin(event)">登 录</button>
         </form>
     </div>
 
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = this.querySelector('input[type="text"]').value;
-            const password = this.querySelector('input[type="password"]').value;
+// login.html
+function doLogin(e) {
+    e.preventDefault();
+    const username = $('#username').val();
+    const password = $('#password').val();
 
-            if(username && password) {
-                let role = 'customer';
-                if(username.includes('rider')) role = 'rider';
-                if(username.includes('merchant')) role = 'merchant';
+    if (!username || !password) {
+        alert("请输入账号和密码");
+        return;
+    }
 
-                window.location.href = `/system/${role}?user=${encodeURIComponent(username)}`;
+    $.ajax({
+        type: "POST",
+        url: "/login/",
+        data: JSON.stringify({username, password}),
+        contentType: "application/json",
+        success: (res) => {
+            if (res === '0') {
+                alert('用户名或密码错误');
+            } else {
+                // 根据账户类型跳转
+                window.location.href = `/system/${res}`;
             }
-        });
-    </script>
+        },
+        error: () => {
+            alert('请求失败，请检查网络连接！');
+        }
+    });
+}
+</script>
+
 </body>
 </html>
 

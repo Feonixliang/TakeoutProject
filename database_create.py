@@ -13,50 +13,59 @@ def create_database_tables():
         )
         cursor = conn.cursor()
 
+        # 创建账户表
+        cursor.execute('''  
+        CREATE TABLE IF NOT EXISTS Account (
+            Id INT PRIMARY KEY AUTO_INCREMENT,
+            AccountName VARCHAR(50) UNIQUE KEY NOT NULL,
+            Password VARCHAR(100) NOT NULL,
+            AccountType ENUM('Rider', 'Customer', 'Merchant','pending') DEFAULT 'pending'
+        ) ENGINE=InnoDB;
+        ''')
+
         # 创建骑手表
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Rider (
-            RId INT PRIMARY KEY AUTO_INCREMENT,
-            RName VARCHAR(20) UNIQUE NOT NULL,
-            RPhone VARCHAR(20) UNIQUE NOT NULL
-        ) ENGINE=InnoDB;
+        CREATE TABLE Rider (
+          RId int NOT NULL,
+          RName varchar(20) NOT NULL,
+          RPhone varchar(20) NOT NULL,
+          PRIMARY KEY (RId),
+          UNIQUE KEY RName (RName),
+          UNIQUE KEY RPhone (RPhone),
+          CONSTRAINT const_Rider_Acc FOREIGN KEY (RId) REFERENCES Account (Id)
+            ) ENGINE=InnoDB;
         ''')
 
         # 创建客户表
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS Customer (
-            CId INT PRIMARY KEY AUTO_INCREMENT,
-            CName VARCHAR(50) UNIQUE NOT NULL,
-            CPhone VARCHAR(30) UNIQUE NOT NULL,
-            CAddress TEXT NOT NULL,
-            CBalance DECIMAL(10,2) DEFAULT 0.00
+            CId int NOT NULL,
+            CName varchar(50) NOT NULL,
+            CPhone varchar(30) NOT NULL,
+            CAddress varchar(200) NOT NULL,
+            CBalance decimal(10,2) NOT NULL,
+            PRIMARY KEY (CId),
+            UNIQUE KEY CName (CName),
+            UNIQUE KEY CPhone (CPhone),
+            CONSTRAINT const_Customer_Acc FOREIGN KEY (CId) REFERENCES Account (Id)
         ) ENGINE=InnoDB;
         ''')
 
         # 创建商家表
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS Merchant (
-            MId INT PRIMARY KEY AUTO_INCREMENT,
-            MName VARCHAR(100) NOT NULL,
-            MPhone VARCHAR(30) UNIQUE NOT NULL,
-            MAddress TEXT NOT NULL,
-            MBalance DECIMAL(10,2) DEFAULT 0.00
+            MId int NOT NULL,
+            MName varchar(100) NOT NULL,
+            MPhone varchar(30) NOT NULL,
+            MAddress varchar(200) NOT NULL,
+            MBalance decimal(10,2) NOT NULL,
+            PRIMARY KEY (MId),
+            UNIQUE KEY MPhone (MPhone),
+            CONSTRAINT const_Merchantr_Acc FOREIGN KEY (MId) REFERENCES Account (Id)
         ) ENGINE=InnoDB;
         ''')
 
-        # 创建账户表
-        cursor.execute('''  
-        
-                CREATE TABLE IF NOT EXISTS Account (
-                    Id INT PRIMARY KEY AUTO_INCREMENT,
-                    AccountName VARCHAR(50) NOT NULL,
-                    Password VARCHAR(100) NOT NULL,
-                    AccountType ENUM('Rider', 'Customer', 'Merchant','pending') DEFAULT 'pending',
-                    FOREIGN KEY (Id) REFERENCES Rider(RId),
-                    FOREIGN KEY (Id) REFERENCES Merchant(MId),
-                    FOREIGN KEY (Id) REFERENCES Customer(CId)
-                ) ENGINE=InnoDB;
-                ''')
+
 
         # 创建菜品表
         cursor.execute('''

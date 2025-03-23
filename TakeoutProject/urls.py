@@ -22,14 +22,15 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
 
     #用户访问www.xxxx.com/login    -> 执行函数
-    path('login/', views.login),
+    path('login/', views.Login),
+    path('system/', views.system_portal),  # 新增系统入口
     path('system/rider', views.rider_system),
     path('system/customer', views.customer_system),
     path('system/merchant', views.merchant_system),
 
     path('register/choose', views.register),
 
-    path('register/rider', views.rider_register),
+    path('register/rider', views.rider_register,name='rider_register'),
     path('register/customer', views.customer_register),
     path('register/merchant', views.merchant_register),
 
