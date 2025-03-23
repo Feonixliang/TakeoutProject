@@ -181,6 +181,35 @@
         .sidebar.active + .sidebar-overlay {
             display: block;
         }
+
+        /* 新增样式 */
+        .order-list {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .order-status {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-pending { background: #FFC107; }
+        .status-active { background: #4CAF50; }
+
+        .action-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -201,19 +230,55 @@
         <header class="top-nav">
             <nav class="user-menu" aria-label="用户菜单">
                 <span class="user-btn">骑手ID：R1234</span>
-                <a href="/login" class="user-btn">退出</a>
+                <a href="/logout/" class="user-btn">退出</a>
             </nav>
         </header>
 
-        <main class="main-content" aria-label="主要内容">
-            <div class="order-card">
-                <h3>订单号：OD20230928001</h3>
-                <p>商家地址：人民路123号</p>
-                <p>客户地址：中山路456号</p>
-                <div class="map-container" role="region" aria-label="地图区域"></div>
-                <button class="user-btn" style="margin-top:10px;">确认接单</button>
+        <main class="main-content">
+        <!-- 待接订单 -->
+        <section aria-labelledby="pending-orders">
+            <h2 id="pending-orders" class="section-title">待接订单（<span id="pending-count">0</span>）</h2>
+            <div class="order-list" id="pending-orders-list">
+                <!-- 动态加载 -->
+                <div class="order-card template" style="display:none;">
+                    <div class="order-status">
+                        <span class="status-indicator status-pending"></span>
+                        <span class="status-text">待接单</span>
+                    </div>
+                    <h3 class="order-id">订单号：<span class="value"></span></h3>
+                    <p>商家地址：<span class="merchant-address value"></span></p>
+                    <p>客户地址：<span class="customer-address value"></span></p>
+                    <p>下单时间：<span class="order-time value"></span></p>
+                    <div class="action-buttons">
+                        <button class="accept-btn user-btn">接单</button>
+                        <button class="detail-btn user-btn">详情</button>
+                    </div>
+                </div>
             </div>
-        </main>
+        </section>
+
+        <!-- 进行中订单 -->
+        <section aria-labelledby="active-orders" style="margin-top: 40px;">
+            <h2 id="active-orders" class="section-title">进行中订单（<span id="active-count">0</span>）</h2>
+            <div class="order-list" id="active-orders-list">
+                <!-- 动态加载 -->
+                <div class="order-card template" style="display:none;">
+                    <div class="order-status">
+                        <span class="status-indicator status-active"></span>
+                        <span class="status-text">配送中</span>
+                    </div>
+                    <h3 class="order-id">订单号：<span class="value"></span></h3>
+                    <p>商家地址：<span class="merchant-address value"></span></p>
+                    <p>客户地址：<span class="customer-address value"></span></p>
+                    <div class="map-container"></div>
+                    <div class="action-buttons">
+                        <button class="complete-btn user-btn">完成配送</button>
+                        <button class="contact-btn user-btn">联系客户</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
     </div>
 
     <script>
@@ -251,6 +316,53 @@
             // 初始化检查
             handleResize();
         })();
+    </script>
+
+    <!-- 新增脚本 -->
+    <script>
+        // 初始化加载订单
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders('pending');
+            loadOrders('active');
+        });
+
+        async function loadOrders(type) {
+            try {
+                const response = await fetch(`/api/orders/?type=${type}`);
+                const data = await response.json();
+
+                const container = document.getElementById(`${type}-orders-list`);
+                const template = container.querySelector('.template');
+
+                // 清空现有内容（保留模板）
+                container.querySelectorAll('.order-card:not(.template)').forEach(el => el.remove());
+
+                data.forEach(order => {
+                    const clone = template.cloneNode(true);
+                    clone.style.display = 'block';
+
+                    // 填充数据
+                    clone.querySelector('.order-id .value').textContent = order.id;
+                    clone.querySelector('.merchant-address').textContent = order.merchant_address;
+                    clone.querySelector('.customer-address').textContent = order.customer_address;
+                    clone.querySelector('.order-time').textContent = new Date(order.created_at).toLocaleString();
+
+                    // 绑定事件
+                    if(type === 'pending') {
+                        clone.querySelector('.accept-btn').addEventListener('click', () => acceptOrder(order.id));
+                    } else {
+                        clone.querySelector('.complete-btn').addEventListener('click', () => completeOrder(order.id));
+                    }
+
+                    container.appendChild(clone);
+                });
+
+                // 更新数量
+                document.getElementById(`${type}-count`).textContent = data.length;
+            } catch (error) {
+                console.error('加载订单失败:', error);
+            }
+        }
     </script>
 </body>
 </html>

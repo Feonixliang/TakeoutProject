@@ -163,12 +163,20 @@ class Merchantdishes(models.Model):
 
 
 class Order(models.Model):
+    STATUS_CHOICES = (
+        ('pending', '待接单'),
+        ('active', '配送中'),
+        ('completed', '已完成'),
+        ('canceled', '已取消')
+    )
     oid = models.AutoField(db_column='OId', primary_key=True)  # Field name made lowercase.
     cid = models.ForeignKey(Customer, models.DO_NOTHING, db_column='CId')  # Field name made lowercase.
     mid = models.ForeignKey(Merchant, models.DO_NOTHING, db_column='MId')  # Field name made lowercase.
     rid = models.ForeignKey('Rider', models.DO_NOTHING, db_column='RId', blank=True, null=True)  # Field name made lowercase.
     totalprice = models.DecimalField(db_column='TotalPrice', max_digits=10, decimal_places=2)  # Field name made lowercase.
     status = models.CharField(max_length=9, blank=True, null=True)
+    merchant_address = models.CharField(max_length=200)
+    customer_address = models.CharField(max_length=200)
 
     class Meta:
         managed = False

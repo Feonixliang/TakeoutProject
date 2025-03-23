@@ -23,6 +23,9 @@ urlpatterns = [
 
     #用户访问www.xxxx.com/login    -> 执行函数
     path('login/', views.Login),
+    path('logout/', views.user_logout, name='logout'),  # 新增退出路由
+
+
     path('system/', views.system_portal),  # 新增系统入口
     path('system/rider', views.rider_system),
     path('system/customer', views.customer_system),

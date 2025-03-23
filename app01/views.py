@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate,login
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse, redirect
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
 import json
@@ -41,27 +44,29 @@ def system_portal(request):
 
     try:
         account_type = request.user.account.accounttype.lower()
+        print(account_type)
         return redirect(f'/system/{account_type}')
     except AttributeError:
         return HttpResponse('账户类型错误')
 
-
-# views.py（补充登录验证）
-
+@login_required
 def rider_system(request):
     if not request.user.is_authenticated:
         return redirect('/login/')
     return render(request, 'rider.html')
 
+@login_required
 def customer_system(request):
     if not request.user.is_authenticated:
         return redirect('/login/')
     return render(request, 'customer.html')
 
+@login_required
 def merchant_system(request):
     if not request.user.is_authenticated:
         return redirect('/login/')
     return render(request, 'merchant.html')
+
 
 def register(request):
     return render(request,'takeoutRegistrationPortal.html')
@@ -124,3 +129,7 @@ def customer_register(request):
 
 def merchant_register(request):
     return render(request, 'merchantRegistration.html')
+
+def user_logout(request):
+    logout(request)  # 清除用户会话
+    return redirect('/login/')  # 重定向到登录页
