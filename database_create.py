@@ -16,9 +16,7 @@ def create_database_tables():
         # 创建账户表
         cursor.execute('''  
         CREATE TABLE IF NOT EXISTS Account (
-            Id INT PRIMARY KEY AUTO_INCREMENT,
-            AccountName VARCHAR(50) UNIQUE KEY NOT NULL,
-            Password VARCHAR(100) NOT NULL,
+            user_id INT PRIMARY KEY AUTO_INCREMENT,
             AccountType ENUM('Rider', 'Customer', 'Merchant','pending') DEFAULT 'pending'
         ) ENGINE=InnoDB;
         ''')
