@@ -1,4 +1,3 @@
-<!-- merchant.html 商家系统完整代码 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商家后台</title>
     <style>
-        /* 包含共用样式 */
+        /* 与rider.html保持一致的CSS变量定义 */
+        :root {
+            --sidebar-width: 240px;         /* 侧边栏宽度 */
+            --primary-color: #1A237E;       /* 主色调（深蓝） */
+            --secondary-color: #1976D2;     /* 次色调（亮蓝） */
+            --hover-color: #303F9F;         /* 悬停颜色 */
+            --text-light: #E8EAF6;          /* 浅色文字 */
+        }
+
+        /* 保持与rider.html一致的全局样式 */
         * {
             margin: 0;
             padding: 0;
@@ -14,115 +22,77 @@
             font-family: '微软雅黑', sans-serif;
         }
 
-        /* 整体布局 */
+        /* 主容器布局（与骑手端保持一致） */
         .container {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* 左侧导航栏 */
+        /* 侧边栏样式（同步rider.html参数） */
         .sidebar {
-            width: 240px;
-            background: #1A237E;
-            padding: 20px;
+            width: var(--sidebar-width);
+            background: var(--primary-color);
             position: fixed;
             height: 100%;
-            transition: 0.3s;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
+        /* LOGO样式统一 */
         .logo {
             color: white;
             font-size: 24px;
-            margin-bottom: 40px;
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* 导航菜单样式统一 */
         .nav-menu {
             list-style: none;
-        }
-
-        .nav-item {
-            margin: 15px 0;
+            padding: 20px;
         }
 
         .nav-link {
-            color: #E8EAF6;
+            color: var(--text-light);
             text-decoration: none;
             padding: 12px;
             display: block;
             border-radius: 6px;
-            transition: 0.3s;
+            transition: background 0.3s ease;
         }
 
         .nav-link:hover {
-            background: #303F9F;
+            background: var(--hover-color);
         }
 
-        /* 顶部导航栏 */
+        /* 顶部导航条（保持与骑手端相同布局） */
         .top-nav {
-            background: #1976D2;
+            background: var(--secondary-color);
             height: 60px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding: 0 30px;
             position: fixed;
-            width: calc(100% - 240px);
-            left: 240px;
-            transition: 0.3s;
+            width: calc(100% - var(--sidebar-width));
+            left: var(--sidebar-width);
         }
 
-        .user-menu {
-            display: flex;
-            gap: 20px;
-        }
-
-        .user-btn {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .user-btn:hover {
-            background: #1565C0;
-        }
-
-        /* 主内容区域 */
+        /* 主内容区域边距同步 */
         .main-content {
-            margin-left: 240px;
-            margin-top: 60px;
-            padding: 30px;
-            background: #E3F2FD;
-            min-height: calc(100vh - 60px);
-            width: calc(100% - 240px);
-            transition: 0.3s;
+            margin-left: var(--sidebar-width);
+            padding: 90px 30px 30px;
         }
 
-        .order-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .map-container {
-            height: 300px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
+        /* 响应式设计（与骑手端相同断点） */
         @media (max-width: 768px) {
             .sidebar {
-                width: 0;
-                z-index: 100;
+                transform: translateX(-100%);
             }
             .sidebar.active {
-                width: 240px;
+                transform: translateX(0);
             }
             .top-nav {
                 width: 100%;
@@ -130,71 +100,196 @@
             }
             .main-content {
                 margin-left: 0;
-                width: 100%;
+            }
+            .menu-toggle {
+                display: block;
             }
         }
-        /* 新增商家系统专属样式 */
+
+        /* 新增商家专属样式 */
         .dish-form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         .dish-card {
             display: flex;
             justify-content: space-between;
-            padding: 15px;
+            align-items: center;
             background: white;
+            padding: 15px;
             border-radius: 8px;
             margin: 10px 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* 与骑手端保持一致的按钮样式 */
+        .user-btn {
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        /* 菜单开关样式统一 */
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            cursor: pointer;
+            font-size: 24px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="menu-toggle">☰</div>
+    <!-- 移动端菜单开关（与骑手端相同结构） -->
+    <button class="menu-toggle" aria-label="切换菜单">☰</button>
+
     <div class="container">
-        <nav class="sidebar">
-            <div class="logo">商家后台</div>
+        <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
+        <nav class="sidebar" aria-label="主菜单">
+            <div class="logo">商家中心</div>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="#" class="nav-link">菜品管理</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">订单管理</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">营业数据</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">店铺设置</a></li>
+                <!-- 使用data-type属性保持与骑手端相同交互逻辑 -->
+                <li><a href="#" class="nav-link" data-type="dishes">菜品管理</a></li>
+                <li><a href="#" class="nav-link" data-type="orders">订单管理</a></li>
+                <li><a href="#" class="nav-link" data-type="settings">店铺设置</a></li>
             </ul>
         </nav>
 
-        <div class="top-nav">
+        <!-- 顶部导航（结构与骑手端一致） -->
+        <header class="top-nav">
             <nav class="user-menu">
-                <span class="user-btn">川味小厨</span>
-                <a href="/login" class="user-btn">退出</a>
+                <span class="user-btn">欢迎您，{{ merchant_name }}</span>
+                <a href="/logout/" class="user-btn">退出</a>
             </nav>
-        </div>
+        </header>
 
+        <!-- 主内容区域（按功能分区） -->
         <main class="main-content">
-            <div class="dish-form">
-                <h3>新增菜品</h3>
-                <input type="text" placeholder="菜品名称" class="input-field">
-                <input type="number" placeholder="价格" class="input-field">
-                <button class="user-btn">上架菜品</button>
-            </div>
+            <!-- 菜品管理区域 -->
+            <section id="dishes" style="display: none;">
+                <h2>菜品管理</h2>
+                <div class="dish-form">
+                    <h3>新增菜品</h3>
+                    <input type="text" placeholder="菜品名称" class="form-control">
+                    <input type="number" placeholder="价格" class="form-control">
+                    <button class="user-btn">上架菜品</button>
+                </div>
 
-            <div class="dish-card">
-                <div>
-                    <h3>水煮鱼</h3>
-                    <p>价格：¥58</p>
+                <div class="dish-list">
+                    <div class="dish-card">
+                        <div>
+                            <h3>水煮鱼</h3>
+                            <p>价格：¥58</p>
+                        </div>
+                        <div>
+                            <button class="user-btn">修改</button>
+                            <button class="user-btn" style="background:#ff4444">下架</button>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <button class="user-btn">修改</button>
-                    <button class="user-btn" style="background:#ff4444">下架</button>
+            </section>
+
+            <!-- 订单管理区域（结构与骑手端订单列表相似） -->
+            <section id="orders" style="display: none;">
+                <h2>进行中订单（<span id="active-count">0</span>）</h2>
+                <div class="order-list" id="active-orders-list">
+                    <!-- 模板内容 -->
+                    <div class="order-card template" style="display:none;">
+                        <!-- 模板内容 -->
+                        <div class="order-status">
+                            <span class="status-indicator status-pending"></span>
+                            <span class="status-text">待接单</span>
+                        </div>
+                        <h3 class="order-id">订单号：<span class="value"></span></h3>
+                        <p>商家地址：<span class="merchant-address value"></span></p>
+                        <p>客户地址：<span class="customer-address value"></span></p>
+                        <p>下单时间：<span class="order-time value"></span></p>
+                        <div class="action-buttons">
+                            <button class="accept-btn user-btn">接单</button>
+                            <button class="detail-btn user-btn">详情</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- 店铺设置区域 -->
+            <section id="settings" style="display: none;">
+                <h2>店铺设置</h2>
+                <!-- 设置表单内容 -->
+            </section>
         </main>
     </div>
 
+    <!-- 保持与骑手端相同的JavaScript架构 -->
     <script>
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
+        // ==================== 侧边栏功能（与骑手端完全相同） ====================
+        (function() {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('no-scroll');
+            }
+
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                }
+            }
+
+            menuToggle.addEventListener('click', toggleSidebar);
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        })();
+
+        // ==================== 导航切换功能（与骑手端相同逻辑） ====================
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 移除所有激活状态
+                document.querySelectorAll('.nav-link').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 设置当前激活状态
+                this.classList.add('active');
+
+                // 获取功能类型
+                const type = this.dataset.type;
+
+                // 切换显示对应区域
+                document.querySelectorAll('section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(type).style.display = 'block';
+
+                // 更新浏览器地址栏
+                history.pushState({}, '', `?type=${type}`);
+            });
+        });
+
+        // ==================== 初始化加载 ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // 默认激活第一个菜单项
+            document.querySelector('[data-type="dishes"]').classList.add('active');
         });
     </script>
 </body>

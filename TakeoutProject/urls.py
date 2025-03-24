@@ -22,7 +22,7 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
 
     #用户访问www.xxxx.com/login    -> 执行函数
-    path('login/', views.Login),
+    path('login/', views.Login,name='login'),
     path('logout/', views.user_logout, name='logout'),  # 新增退出路由
 
 
@@ -39,7 +39,7 @@ urlpatterns = [
 
     path('register/rider', views.rider_register,name='rider_register'),
     path('register/customer', views.customer_register),
-    path('register/merchant', views.merchant_register),
+    path('register/merchant', views.merchant_register,name='merchant_register'),
 
 
 ]

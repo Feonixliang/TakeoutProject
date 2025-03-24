@@ -8,7 +8,7 @@ def create_database_tables():
         conn = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='123456',
+            password='',
             database='takeout'
         )
         cursor = conn.cursor()
@@ -30,7 +30,7 @@ def create_database_tables():
           PRIMARY KEY (RId),
           UNIQUE KEY RName (RName),
           UNIQUE KEY RPhone (RPhone),
-          CONSTRAINT const_Rider_Acc FOREIGN KEY (RId) REFERENCES Account (Id)
+          CONSTRAINT const_Rider_Acc FOREIGN KEY (RId) REFERENCES Account (user_id)
             ) ENGINE=InnoDB;
         ''')
 
@@ -45,7 +45,7 @@ def create_database_tables():
             PRIMARY KEY (CId),
             UNIQUE KEY CName (CName),
             UNIQUE KEY CPhone (CPhone),
-            CONSTRAINT const_Customer_Acc FOREIGN KEY (CId) REFERENCES Account (Id)
+            CONSTRAINT const_Customer_Acc FOREIGN KEY (CId) REFERENCES Account (user_id)
         ) ENGINE=InnoDB;
         ''')
 
@@ -59,7 +59,7 @@ def create_database_tables():
             MBalance decimal(10,2) NOT NULL,
             PRIMARY KEY (MId),
             UNIQUE KEY MPhone (MPhone),
-            CONSTRAINT const_Merchantr_Acc FOREIGN KEY (MId) REFERENCES Account (Id)
+            CONSTRAINT const_Merchantr_Acc FOREIGN KEY (MId) REFERENCES Account (user_id)
         ) ENGINE=InnoDB;
         ''')
 
