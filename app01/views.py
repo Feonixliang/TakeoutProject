@@ -242,7 +242,63 @@ def rider_register(request):
     return render(request, 'riderRegistration.html')
 
 def customer_register(request):
-    """客户注册页面（示例）"""
+    """
+    客户注册API
+    处理客户注册的完整流程：
+    1. 创建Django用户
+    2. 创建关联的Account记录
+    3. 创建客户详细信息
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # 获取注册参数
+            name = data.get('name')
+            username = data.get('username')
+            password = data.get('password')
+            phone = data.get('phone')
+            address = data.get('address')
+
+            # 参数校验
+            if not all([name, username, password, phone, address]):
+                return HttpResponse('缺少必要参数', status=400)
+
+            # 用户名唯一性检查
+            if User.objects.filter(username=username).exists():
+                return HttpResponse('用户名已存在', status=400)
+
+            # 创建用户（自动处理密码哈希）
+            user = User.objects.create_user(
+                username=username,
+                password=password
+            )
+
+            # 创建关联账户（设置类型为Rider）
+            account = Account.objects.create(
+                user=user,
+                accounttype="customer"
+            )
+
+            # 创建骑手详细信息（与Account一对一关联）
+            Customer.objects.create(
+                cid=account,  # 使用Account作为主键
+                cname=name,
+                cphone=phone,
+                caddress=address,
+                cbalance=0.0
+            )
+
+            # 自动登录新注册用户
+            user = authenticate(username=username, password=password)
+            if user:
+                login(request, user)
+                return HttpResponse('注册成功', status=201)
+
+            return HttpResponse('注册成功，请登录', status=201)
+
+        except Exception as e:
+            return HttpResponse(f'注册失败: {str(e)}', status=400)
+
     return render(request, 'customerRegistration.html')
 
 def merchant_register(request):

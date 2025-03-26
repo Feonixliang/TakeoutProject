@@ -38,7 +38,7 @@ urlpatterns = [
     path('register/choose', views.register),
 
     path('register/rider', views.rider_register,name='rider_register'),
-    path('register/customer', views.customer_register),
+    path('register/customer', views.customer_register,name='customer_register'),
     path('register/merchant', views.merchant_register,name='merchant_register'),
 
 
