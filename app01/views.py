@@ -161,23 +161,10 @@ def customer_system(request):
 
 @login_required
 def merchant_system(request):
-    """
-    商家子系统主页
-    显示商家基本信息
-    """
-    try:
-        # 通过反向关联获取商家信息（Account -> Rider）
-        merchant = request.user.account.merchant
-        context = {
-            'merchant_id': merchant.mid_id,    # 关联的Account主键
-            'merchant_name': merchant.mname,
-            'merchant_phone': merchant.mphone,
-            'merchant_address': merchant.maddress,
-            'merchant_balance': merchant.mbalance
-        }
-        return render(request, 'merchant.html', context)
-    except AttributeError:
-        raise PermissionDenied("非商家账户")  # 权限校验失败
+    """商家子系统主页（示例模板）"""
+    if not request.user.is_authenticated:
+        return redirect('/login/')
+    return render(request, 'merchant.html')
 
 # 注册相关视图
 def register(request):
@@ -196,7 +183,7 @@ def rider_register(request):
         try:
             data = json.loads(request.body)
             # 获取注册参数
-            username = data.get('account')
+            username = data.get('username')
             password = data.get('password')
             name = data.get('name')
             phone = data.get('phone')
@@ -218,7 +205,7 @@ def rider_register(request):
             # 创建关联账户（设置类型为Rider）
             account = Account.objects.create(
                 user=user,
-                accounttype="rider"
+                accounttype="Rider"
             )
 
             # 创建骑手详细信息（与Account一对一关联）
@@ -242,29 +229,30 @@ def rider_register(request):
     return render(request, 'riderRegistration.html')
 
 def customer_register(request):
-    """客户注册页面（示例）"""
-    return render(request, 'customerRegistration.html')
-
-def merchant_register(request):
+    """
+    骑手注册API
+    处理骑手注册的完整流程：
+    1. 创建Django用户
+    2. 创建关联的Account记录
+    3. 创建骑手详细信息
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             # 获取注册参数
-            name = data.get('name')#username是Django的账户
             username = data.get('username')
+            account = data.get('account')
             password = data.get('password')
             phone = data.get('phone')
             address = data.get('address')
-            balance = 0.0
-
 
             # 参数校验
-            if not all([name, username, password, phone, address]):
+            if not all([username,account , password, phone, address]):
                 return HttpResponse('缺少必要参数', status=400)
 
             # 用户名唯一性检查
             if User.objects.filter(username=username).exists():
-                return HttpResponse('账户已存在', status=400)
+                return HttpResponse('用户名已存在', status=400)
 
             # 创建用户（自动处理密码哈希）
             user = User.objects.create_user(
@@ -272,19 +260,19 @@ def merchant_register(request):
                 password=password
             )
 
-            # 创建关联账户（设置类型为merchant）
+            # 创建关联账户（设置类型为Rider）
             account = Account.objects.create(
                 user=user,
-                accounttype="merchant"
+                accounttype="Customer"
             )
 
-            # 创建商家详细信息（与Account一对一关联）
-            Merchant.objects.create(
-                mid=account,  # 使用Account作为主键
-                mname=name,
-                mphone=phone,
-                maddress=address,
-                mbalance=balance
+            # 创建骑手详细信息（与Account一对一关联）
+            Customer.objects.create(
+                cid=account,  # 使用Account作为主键
+                cname=username,
+                cphone=phone,
+                caddress=address,
+                cbalance=0
             )
 
             # 自动登录新注册用户
@@ -298,6 +286,10 @@ def merchant_register(request):
         except Exception as e:
             return HttpResponse(f'注册失败: {str(e)}', status=400)
 
+    return render(request, 'customerRegistration.html')
+
+def merchant_register(request):
+    """商家注册页面（示例）"""
     return render(request, 'merchantRegistration.html')
 
 def user_logout(request):
