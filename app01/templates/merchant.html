@@ -237,6 +237,36 @@
             display: flex;
             gap: 10px;
         }
+
+        /* 新增编辑表单样式 */
+        .edit-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .edit-form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -297,6 +327,28 @@
                         </div>
                     </div>
 
+                <!-- 新增编辑表单模板 -->
+                <div class="edit-form-overlay" style="display: none;">
+                    <div class="edit-form">
+                        <h3>修改菜品信息</h3>
+                        <form id="edit-dish-form">
+                            <div class="form-group">
+                                <input type="text" id="edit-dish-name" required>
+                                <input type="number" id="edit-dish-price" min="0" step="0.01" required>
+                                <select id="edit-dish-category">
+                                    <option value="主食">主食</option>
+                                    <option value="饮料">饮料</option>
+                                    <option value="小吃">小吃</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="user-btn cancel-edit">取消</button>
+                                <button type="submit" class="user-btn confirm-edit">保存修改</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- 菜品列表模板 -->
                 <div class="dish-list">
 
@@ -333,15 +385,21 @@
             </section>
         </main>
     </div>
+
+
+
     <script>
     // 导航管理类
+    // ===================== 导航管理类 =====================
     class NavigationManager {
         constructor() {
             this.currentSection = null;
-            this.init();
+            this.initNavigation();
+            this.initDynamicElements();
         }
 
-        init() {
+        // --------------- 初始化方法 ---------------
+        initNavigation() {
             // 绑定导航点击事件
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', e => this.handleNavClick(e));
@@ -351,10 +409,132 @@
             this.switchSection(this.getInitialSection());
         }
 
+        initDynamicElements() {
+            // 移动端菜单切换
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('no-scroll');
+            });
+
+            // 窗口大小变化监听
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    document.body.classList.remove('no-scroll');
+                }
+            });
+        }
+
+        // --------------- 核心功能方法 ---------------
+        async loadDishes() {
+            try {
+                const response = await fetch('/api/dishes/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+
+                const dishes = await response.json();
+                this.renderDishList(dishes);
+
+            } catch (error) {
+                this.showError('dishes', '加载失败，请刷新重试');
+                console.error('菜品加载失败:', error);
+            }
+        }
+
+        renderDishList(dishes) {
+            const template = document.querySelector('#dishes .dish-card.template');
+            const dishList = document.querySelector('#dishes .dish-list');
+            dishList.innerHTML = '';
+
+            dishes.forEach(dish => {
+                const clone = template.cloneNode(true);
+                clone.classList.remove('template');
+                clone.style.display = 'flex';
+                clone.dataset.dishId = dish.id;
+
+                // 填充菜品数据
+                clone.querySelector('.dish-name').textContent = dish.name;
+                clone.querySelector('.dish-price').textContent = Number(dish.price).toFixed(2);
+                clone.querySelector('.dish-category').textContent = dish.category || '未分类';
+
+                // 绑定操作事件
+                clone.querySelector('.edit-btn').addEventListener('click', () => this.showEditForm(dish));
+                clone.querySelector('.delete-btn').addEventListener('click', () => this.handleDeleteDish(dish, clone));
+
+                dishList.appendChild(clone);
+            });
+        }
+
+        // --------------- 事件处理方法 ---------------
+        async handleDeleteDish(dish, element) {
+            if (!confirm(`确认删除 ${dish.name}？`)) return;
+
+            try {
+                const response = await fetch(`/api/dishes/${dish.id}/`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                response.ok ? element.remove() : alert('删除失败');
+            } catch (error) {
+                alert('网络错误，请检查连接');
+            }
+        }
+
+        // --------------- 表单操作方法 ---------------
+        async saveDishChanges(dishId, newData) {
+            try {
+                const response = await fetch(`/api/dishes/${dishId}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(newData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '保存失败');
+                }
+
+                await this.loadDishes(); // 关键数据同步点
+                return true;
+
+            } catch (error) {
+                alert(error.message);
+                return false;
+            }
+        }
+
+        // --------------- 辅助方法 ---------------
         getInitialSection() {
             const params = new URLSearchParams(window.location.search);
             return params.get('type') || 'dishes';
         }
+
+        switchSection(sectionId) {
+            document.querySelectorAll('section').forEach(section =>
+                section.style.display = 'none'
+            );
+
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.style.display = 'block';
+                this.currentSection = sectionId;
+                this.loadSectionData(sectionId);
+            }
+
+            // 更新导航激活状态
+            document.querySelectorAll('.nav-link').forEach(link =>
+                link.classList.toggle('active', link.dataset.type === sectionId)
+            );
+        }
+
 
         handleNavClick(event) {
             event.preventDefault();
@@ -363,25 +543,6 @@
             this.updateURL(targetSection);
         }
 
-        switchSection(sectionId) {
-            // 隐藏所有内容区域
-            document.querySelectorAll('section').forEach(section => {
-                section.style.display = 'none';
-            });
-
-            // 显示目标区域
-            const targetElement = document.getElementById(sectionId);
-            if (targetElement) {
-                targetElement.style.display = 'block';
-                this.currentSection = sectionId;
-                this.loadSectionData(sectionId);
-            }
-
-            // 更新导航激活状态
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.toggle('active', link.dataset.type === sectionId);
-            });
-        }
 
         updateURL(sectionId) {
             const newUrl = `${window.location.pathname}?type=${sectionId}`;
@@ -402,75 +563,6 @@
             }
         }
 
-        // 加载菜品数据
-        async loadDishes() {
-            try {
-                const response = await fetch('/api/dishes/', {
-                    method: 'GET',
-                    credentials: 'include' // 携带会话cookie
-                });
-                // 添加详细状态码检查
-                if (response.status === 403) {
-                    throw new Error('请重新登录');
-                }
-                if (!response.ok) {
-                    throw new Error(`HTTP错误 ${response.status}`);
-                }
-
-                const dishes = await response.json();
-                console.log('收到数据:', dishes); // 调试输出
-
-                 // 修改选择器路径，确保获取正确的模板
-                const template = document.querySelector('#dishes .dish-card.template');
-                if (!template) {
-                    throw new Error('找不到菜品模板元素，请检查HTML结构');
-                }
-                const dishList = document.querySelector('#dishes .dish-list');
-                dishList.innerHTML = ''; // 这里不再会删除模板
-
-                dishes.forEach(dish => {
-                    // 添加调试输出
-                    console.log('Processing dish:', dish);
-
-                    const clone = template.cloneNode(true);
-                    clone.classList.remove('template');
-                    clone.style.display = 'flex';
-                    clone.dataset.dishId = dish.id;
-
-                    const price = Number(dish.price) || 0;
-                    clone.querySelector('.dish-name').textContent = dish.name;
-                    clone.querySelector('.dish-price').textContent = price.toFixed(2);
-                    clone.querySelector('.dish-category').textContent = dish.category || '未分类';
-
-                    // 绑定删除事件
-                    clone.querySelector('.delete-btn').addEventListener('click', async () => {
-                        if (confirm(`确认删除 ${dish.name}？`)) {
-                            try {
-                                const deleteResponse = await fetch(`/api/dishes/${dish.id}/`, {
-                                    method: 'DELETE',
-                                    credentials: 'include'
-                                });
-
-                                if (deleteResponse.ok) {
-                                    clone.remove();
-                                } else {
-                                    const error = await deleteResponse.json();
-                                    alert(error.error || '删除失败');
-                                }
-                            } catch (error) {
-                                alert('网络错误，请检查连接');
-                            }
-                        }
-                    });
-
-                    dishList.appendChild(clone);
-                });
-            } catch (error) {
-                console.error('加载失败详情:', error);
-                this.showError('dishes', '加载失败，请刷新重试');
-            }
-        }
-
         // 显示错误信息
         showError(sectionId, message) {
             const errorElement = document.querySelector(`#${sectionId} .error-msg`);
@@ -480,6 +572,23 @@
             }
         }
 
+        showEditForm(dish) {
+            const overlay = document.querySelector('.edit-form-overlay');
+            const form = document.getElementById('edit-dish-form');
+
+            // 填充当前数据
+            document.getElementById('edit-dish-name').value = dish.name;
+            document.getElementById('edit-dish-price').value = dish.price;
+            document.getElementById('edit-dish-category').value = dish.category || '';
+
+            // 显示表单
+            overlay.style.display = 'flex';
+
+            // 保存当前菜品ID
+            form.dataset.dishId = dish.id;
+        }
+
+
         // 其他模块加载方法（示例）
         async loadOrders() {
             console.log('订单加载逻辑...');
@@ -488,32 +597,15 @@
         async loadSettings() {
             console.log('设置加载逻辑...');
         }
+
+
     }
 
-    // 初始化导航系统
-    let navigationManager;
-
+    // ===================== 页面初始化 =====================
     document.addEventListener('DOMContentLoaded', () => {
-        // 侧边栏响应式处理
-        const sidebar = document.querySelector('.sidebar');
-        const menuToggle = document.querySelector('.menu-toggle');
+        const navigationManager = new NavigationManager();
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            document.body.classList.toggle('no-scroll');
-        });
-
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-                document.body.classList.remove('no-scroll');
-            }
-        });
-
-        // 初始化导航管理器
-        navigationManager = new NavigationManager();
-
-        // 新增菜品按钮事件
+        // --------------- 新增菜品事件 ---------------
         document.querySelector('.add-dish-btn').addEventListener('click', async () => {
             const nameInput = document.getElementById('dish-name');
             const priceInput = document.getElementById('dish-price');
@@ -560,6 +652,56 @@
                 errorDiv.textContent = '网络错误，请检查连接';
             }
         });
+
+        // --------------- 编辑表单事件 ---------------
+        const editForm = document.getElementById('edit-dish-form');
+        const overlay = document.querySelector('.edit-form-overlay');
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dishId = editForm.dataset.dishId;
+            const newData = {
+                name: document.getElementById('edit-dish-name').value.trim(),
+                price: parseFloat(document.getElementById('edit-dish-price').value),
+                category: document.getElementById('edit-dish-category').value
+            };
+
+            if (await navigationManager.saveDishChanges(dishId, newData)) {
+                overlay.style.display = 'none';
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 侧边栏响应式处理
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            document.body.classList.toggle('no-scroll');
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+            }
+        });
+
+
+
+        // 取消按钮
+        document.querySelector('.cancel-edit').addEventListener('click', () => {
+            overlay.style.display = 'none';
+        });
+
+        // 点击遮罩层关闭
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
     });
 
     // 处理浏览器历史记录
@@ -568,6 +710,7 @@
             navigationManager.switchSection(event.state.section);
         }
     });
+
     </script>
 
 </body>

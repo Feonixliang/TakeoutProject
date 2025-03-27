@@ -369,51 +369,81 @@ def user_logout(request):
 from django.views.decorators.csrf import csrf_exempt
 
 
-@csrf_exempt  # 添加这个装饰器
+@csrf_exempt
 @login_required
-@require_http_methods(["GET", "POST", "DELETE"])
+@require_http_methods(["GET", "POST", "DELETE"])  # 保持POST方法
 def dish_api(request, dish_id=None):
     try:
+        # 获取当前登录用户的关联商家信息。
         merchant = request.user.account.merchant
 
-        # GET请求：获取当前商家的所有菜品
+        # 如果请求方法是 GET，则获取当前商家的所有菜品信息。
         if request.method == 'GET':
-            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)
+            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)# 查询数据库中属于当前商家的所有菜品。
             data = [{
-                "id": dish.did,
-                "name": dish.dname,
-                "price": float(dish.dprice),
-                "category": dish.dcategory
-            } for dish in dishes]
+                "id": dish.did,                 # 菜品ID
+                "name": dish.dname,             # 菜品名称
+                "price": float(dish.dprice),    # 转换菜品价格为浮点数格式
+                "category": dish.dcategory      # 菜品类别
+            } for dish in dishes]               # 遍历查询到的每个菜品对象，并构建字典。
             print(data)
             return JsonResponse(data, safe=False)
 
-        # POST请求：创建新菜品并关联商家
-        if request.method == 'POST':
+        if request.method == 'POST' and dish_id:  # 修改逻辑
+            # 验证菜品归属
+            dish = Dishes.objects.get(did=dish_id)
+            Merchantdishes.objects.get(did=dish, mid=merchant)
+
             data = json.loads(request.body)
 
-            dish = Dishes.objects.create(
-                dname=data['name'],
-                dprice=data['price'],
-                dcategory=data.get('category', '')
-            )
+            # 更新字段
+            update_fields = []
+            if 'name' in data:
+                dish.dname = data['name']
+                update_fields.append('dname')
+            if 'price' in data:
+                dish.dprice = data['price']
+                update_fields.append('dprice')
+            if 'category' in data:
+                dish.dcategory = data['category']
+                update_fields.append('dcategory')
 
-            # 关联到当前商家
-            Merchantdishes.objects.create(did=dish, mid=merchant)
+            if update_fields:
+                dish.save(update_fields=update_fields)
 
             return JsonResponse({
                 "id": dish.did,
                 "name": dish.dname,
                 "price": float(dish.dprice),
                 "category": dish.dcategory
+            })
+
+        # 如果请求方法是 POST，则创建一个新的菜品并将其关联到当前商家。
+        if request.method == 'POST' and not dish_id:
+            data = json.loads(request.body)# 解析请求体中的 JSON 数据。
+
+            dish = Dishes.objects.create(# 在数据库中创建新的菜品记录。
+                dname=data['name'],
+                dprice=data['price'],
+                dcategory=data.get('category', '')
+            )
+
+            # 创建 Merchantdishes 记录来关联新菜品和商家。
+            Merchantdishes.objects.create(did=dish, mid=merchant)
+
+            return JsonResponse({# 向客户端返回包含新创建菜品信息的 JSON 响应
+                "id": dish.did,
+                "name": dish.dname,
+                "price": float(dish.dprice),
+                "category": dish.dcategory
             }, status=201)
 
-        # DELETE请求：删除菜品
+        # 如果请求方法是 DELETE，则删除指定 ID 的菜品。
         if request.method == 'DELETE':
             try:
-                dish = Dishes.objects.get(did=dish_id)
-                Merchantdishes.objects.get(did=dish, mid=merchant).delete()
-                dish.delete()
+                dish = Dishes.objects.get(did=dish_id)                          # 从数据库中获取要删除的菜品。
+                Merchantdishes.objects.get(did=dish, mid=merchant).delete()     # 删除该菜品与商家之间的关联。
+                dish.delete()                                                   # 从数据库中彻底移除该菜品。
                 return JsonResponse({"status": "success"})
             except Exception as e:
                 return JsonResponse({"error": str(e)}, status=404)
