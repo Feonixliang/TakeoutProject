@@ -2,12 +2,13 @@
 Django 视图模块，处理用户认证、系统入口和各类型用户功能页面
 包含登录、注册、系统门户和不同用户类型的业务逻辑
 """
-
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
+from django.db import IntegrityError
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
@@ -143,6 +144,7 @@ def api_orders(request):
 def accept_order(request, order_id):
     try:
         order = Order.objects.get(oid=order_id)
+        #筛选未接取 & 骑手未接订单
         if order.status == 'pending' and not order.rid:
             order.rid = request.user.account.rider
             order.status = 'active'
@@ -152,12 +154,14 @@ def accept_order(request, order_id):
     except Order.DoesNotExist:
         return JsonResponse({'error': '订单不存在'}, status=404)
 
+
 @login_required
 def customer_system(request):
     """客户子系统主页（示例模板）"""
     if not request.user.is_authenticated:
         return redirect('/login/')
     return render(request, 'customer.html')
+
 
 @login_required
 def merchant_system(request):
@@ -360,3 +364,59 @@ def user_logout(request):
     """用户登出功能"""
     logout(request)  # 清除用户会话
     return redirect('/login/')  # 重定向到登录页
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt  # 添加这个装饰器
+@login_required
+@require_http_methods(["GET", "POST", "DELETE"])
+def dish_api(request, dish_id=None):
+    try:
+        merchant = request.user.account.merchant
+
+        # GET请求：获取当前商家的所有菜品
+        if request.method == 'GET':
+            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)
+            data = [{
+                "id": dish.did,
+                "name": dish.dname,
+                "price": float(dish.dprice),
+                "category": dish.dcategory
+            } for dish in dishes]
+            print(data)
+            return JsonResponse(data, safe=False)
+
+        # POST请求：创建新菜品并关联商家
+        if request.method == 'POST':
+            data = json.loads(request.body)
+
+            dish = Dishes.objects.create(
+                dname=data['name'],
+                dprice=data['price'],
+                dcategory=data.get('category', '')
+            )
+
+            # 关联到当前商家
+            Merchantdishes.objects.create(did=dish, mid=merchant)
+
+            return JsonResponse({
+                "id": dish.did,
+                "name": dish.dname,
+                "price": float(dish.dprice),
+                "category": dish.dcategory
+            }, status=201)
+
+        # DELETE请求：删除菜品
+        if request.method == 'DELETE':
+            try:
+                dish = Dishes.objects.get(did=dish_id)
+                Merchantdishes.objects.get(did=dish, mid=merchant).delete()
+                dish.delete()
+                return JsonResponse({"status": "success"})
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

@@ -371,9 +371,9 @@
                     clone.querySelector('.accept-btn').addEventListener('click', async () => {
                         const response = await fetch(`/api/orders/${order.id}/accept/`, {
                             method: 'POST',
-                            headers: {
+                            /*headers: {
                                 'X-CSRFToken': getCookie('csrftoken')
-                            }
+                            }*/
                         });
                         if(response.ok) {
                             loadOrders('pending');  // 刷新列表
