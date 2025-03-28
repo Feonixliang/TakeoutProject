@@ -463,23 +463,26 @@ def dish_api(request, dish_id=None):
 @require_http_methods(["GET", "POST"])
 def merchant_settings_api(request):
     try:
+        # 安全获取商家对象（自动处理404）
         merchant = request.user.account.merchant
 
+        # GET请求处理：返回当前设置
         if request.method == 'GET':
             return JsonResponse({
-                'name': merchant.mname,
-                'phone': merchant.mphone,
-                'address': merchant.maddress
+                'name': merchant.mname,         # 商家名称
+                'phone': merchant.mphone,       # 联系电话
+                'address': merchant.maddress    # 店铺地址
             })
 
+        # POST请求处理：更新设置
         if request.method == 'POST':
             data = json.loads(request.body)
 
-            # 数据验证
+            # 数据完整性校验
             if not all([data.get('name'), data.get('phone'), data.get('address')]):
                 return JsonResponse({'error': '所有字段必须填写'}, status=400)
 
-            # 更新数据
+            # 逐步更新字段
             merchant.mname = data['name']
             merchant.mphone = data['phone']
             merchant.maddress = data['address']
