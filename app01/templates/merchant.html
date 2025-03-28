@@ -267,6 +267,42 @@
             gap: 15px;
             justify-content: flex-end;
         }
+
+         .settings-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .settings-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .settings-form label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        .settings-form textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        /* 添加加载状态提示 */
+        .loading-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            z-index: 3000;
+        }
     </style>
 </head>
 <body>
@@ -381,7 +417,26 @@
             <!-- 店铺设置区域 -->
             <section id="settings" style="display: none;">
                 <h2>店铺设置</h2>
-                <!-- 设置表单内容 -->
+                <div class="settings-form">
+                    <form id="merchant-settings-form">
+                        <div class="form-group">
+                            <label>店铺名称:  </label>
+                            <input type="text" id="merchant-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话</label>
+                            <input type="tel" id="merchant-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>店铺地址</label>
+                            <textarea id="merchant-address" rows="3" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="user-btn">保存设置</button>
+                        </div>
+                        <div class="error-msg" id="settings-error"></div>
+                    </form>
+                </div>
             </section>
         </main>
     </div>
@@ -446,6 +501,27 @@
                 console.error('菜品加载失败:', error);
             }
         }
+
+        async loadSettings() {
+            try {
+                const response = await fetch('/api/merchant/settings/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+
+                const data = await response.json();
+                document.getElementById('merchant-name').value = data.name || '';
+                document.getElementById('merchant-phone').value = data.phone || '';
+                document.getElementById('merchant-address').value = data.address || '';
+
+            } catch (error) {
+                console.error('加载设置失败:', error);
+                this.showError('settings', '加载设置失败');
+            }
+        }
+
 
         renderDishList(dishes) {
             const template = document.querySelector('#dishes .dish-card.template');
@@ -594,16 +670,15 @@
             console.log('订单加载逻辑...');
         }
 
-        async loadSettings() {
-            console.log('设置加载逻辑...');
-        }
-
 
     }
 
     // ===================== 页面初始化 =====================
     document.addEventListener('DOMContentLoaded', () => {
         const navigationManager = new NavigationManager();
+        const loadingMask = document.createElement('div');
+        loadingMask.className = 'loading-mask';
+        document.body.appendChild(loadingMask);
 
         // --------------- 新增菜品事件 ---------------
         document.querySelector('.add-dish-btn').addEventListener('click', async () => {
@@ -623,6 +698,9 @@
                 errorDiv.textContent = '请输入有效价格';
                 return;
             }
+
+            // ======== 第二部分：开始请求时显示 ========
+            loadingMask.style.display = 'block'; // 新增代码
 
             try {
                 const response = await fetch('/api/dishes/', {
@@ -651,11 +729,15 @@
             } catch (error) {
                 errorDiv.textContent = '网络错误，请检查连接';
             }
+            finally {    // 新增finally块
+                loadingMask.style.display = 'none'; // 新增代码
+            }
         });
 
         // --------------- 编辑表单事件 ---------------
         const editForm = document.getElementById('edit-dish-form');
         const overlay = document.querySelector('.edit-form-overlay');
+        const settingForm = document.getElementById('merchant-settings-form');
 
         editForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -670,7 +752,59 @@
                 overlay.style.display = 'none';
             }
         });
+
+        settingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loadingMask.style.display = 'block';
+            const dishId = settingForm.dataset.mid;
+            const formData = {
+                name: document.getElementById('merchant-name').value.trim(),
+                phone: document.getElementById('merchant-phone').value.trim(),
+                address: document.getElementById('merchant-address').value.trim()
+            };
+
+            const errorDiv = document.getElementById('settings-error');
+            errorDiv.textContent = '';
+
+            // 前端验证
+            if (!formData.name) {
+                errorDiv.textContent = '店铺名称不能为空';
+                return;
+            }
+            if (!formData.phone) {
+                errorDiv.textContent = '手机号码不能为空';
+                return;
+            }
+            if (!formData.address) {
+                errorDiv.textContent = '店铺地址不能为空';
+                return;
+            }
+            try {
+                const response = await fetch('/api/merchant/settings/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('设置已保存');
+                    // 更新页面显示
+                    document.querySelector('.user-btn:first-child').textContent = `欢迎您，${formData.name}`;
+                } else {
+                    errorDiv.textContent = data.error || '保存失败';
+                }
+            } catch (error) {
+                errorDiv.textContent = '网络错误，请检查连接';
+            }
+            finally {    // 新增finally块
+                loadingMask.style.display = 'none'; // 新增代码
+            }
+        });
     });
+
 
     document.addEventListener('DOMContentLoaded', () => {
         // 侧边栏响应式处理

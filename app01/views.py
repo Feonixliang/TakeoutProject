@@ -28,6 +28,8 @@ def Login(request):
     else:
         return render(request, 'login.html')
 
+
+
 def verify(request):
     """
     登录验证API
@@ -182,6 +184,8 @@ def merchant_system(request):
         return render(request, 'merchant.html', context)
     except AttributeError:
         raise PermissionDenied("非商家账户")  # 权限校验失败
+
+
 
 # 注册相关视图
 def register(request):
@@ -386,9 +390,11 @@ def dish_api(request, dish_id=None):
                 "price": float(dish.dprice),    # 转换菜品价格为浮点数格式
                 "category": dish.dcategory      # 菜品类别
             } for dish in dishes]               # 遍历查询到的每个菜品对象，并构建字典。
+
             print(data)
             return JsonResponse(data, safe=False)
 
+        #修改菜品
         if request.method == 'POST' and dish_id:  # 修改逻辑
             # 验证菜品归属
             dish = Dishes.objects.get(did=dish_id)
@@ -450,3 +456,36 @@ def dish_api(request, dish_id=None):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+@login_required
+@require_http_methods(["GET", "POST"])
+def merchant_settings_api(request):
+    try:
+        merchant = request.user.account.merchant
+
+        if request.method == 'GET':
+            return JsonResponse({
+                'name': merchant.mname,
+                'phone': merchant.mphone,
+                'address': merchant.maddress
+            })
+
+        if request.method == 'POST':
+            data = json.loads(request.body)
+
+            # 数据验证
+            if not all([data.get('name'), data.get('phone'), data.get('address')]):
+                return JsonResponse({'error': '所有字段必须填写'}, status=400)
+
+            # 更新数据
+            merchant.mname = data['name']
+            merchant.mphone = data['phone']
+            merchant.maddress = data['address']
+            merchant.save()
+
+            return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

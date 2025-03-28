@@ -37,12 +37,14 @@ urlpatterns = [
     path('register/rider', views.rider_register,name='rider_register'),
     path('register/customer', views.customer_register,name='customer_register'),
     path('register/merchant', views.merchant_register,name='merchant_register'),
-
+    path('api/merchant/settings/', views.merchant_settings_api),
 
 
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
     path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
     path('api/dishes/', views.dish_api, name='dish_api'),
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
+
+
 
 ]
