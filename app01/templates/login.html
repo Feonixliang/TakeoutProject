@@ -169,6 +169,7 @@
         <h1>欢迎登录外卖系统</h1>
 
         <form id="loginForm" onsubmit="return false;">
+            {% csrf_token %}
             <div class="form-group">
                 <input type="text" id="username" class="form-control" placeholder="用户名" required>
             </div>
@@ -184,36 +185,34 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
 
     <script>
-// login.html
-function doLogin(e) {
-    e.preventDefault();
-    const username = $('#username').val();
-    const password = $('#password').val();
+    function doLogin(e) {
+        e.preventDefault();
+        const username = $('#username').val();
+        const password = $('#password').val();
 
-    if (!username || !password) {
-        alert("请输入账号和密码");
-        return;
-    }
-
-    $.ajax({
-        type: "POST",
-        url: "/login/",
-        data: JSON.stringify({username, password}),
-        contentType: "application/json",
-        success: (res) => {
-            if (res === '0') {
-                alert('用户名或密码错误');
-            } else {
-                // 根据账户类型跳转
-                window.location.href = `/system/${res}`;
-            }
-        },
-        error: () => {
-            alert('请求失败，请检查网络连接！');
+        if (!username || !password) {
+            alert("请输入账号和密码");
+            return;
         }
-    });
-}
-</script>
+
+        $.ajax({
+            type: "POST",
+            url: "/login/",
+            data: JSON.stringify({username, password}),
+            contentType: "application/json",
+            success: (res) => {
+                if (res === '0') {
+                    alert('用户名或密码错误');
+                } else {
+                    window.location.href = `/system/${res}`;
+                }
+            },
+            error: (xhr) => {
+                    alert('请求失败，请检查网络连接！');
+            }
+        });
+    }
+    </script>
 
 </body>
 </html>

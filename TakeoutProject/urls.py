@@ -22,7 +22,7 @@ urlpatterns = [
     #    path('admin/', admin.site.urls),
 
     #用户访问www.xxxx.com/login    -> 执行函数
-    path('login/', views.Login),
+    path('login/', views.Login,name='login'),
     path('logout/', views.user_logout, name='logout'),  # 新增退出路由
 
 
@@ -31,15 +31,20 @@ urlpatterns = [
     path('system/customer', views.customer_system),
     path('system/merchant', views.merchant_system),
 
-    path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
-    path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
-
 
     path('register/choose', views.register),
 
     path('register/rider', views.rider_register,name='rider_register'),
     path('register/customer', views.customer_register,name='customer_register'),
-    path('register/merchant', views.merchant_register),
+    path('register/merchant', views.merchant_register,name='merchant_register'),
+    path('api/merchant/settings/', views.merchant_settings_api),
+
+
+    path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
+    path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
+    path('api/dishes/', views.dish_api, name='dish_api'),
+    path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
+
 
 
 ]

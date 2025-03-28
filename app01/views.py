@@ -2,12 +2,13 @@
 Django 视图模块，处理用户认证、系统入口和各类型用户功能页面
 包含登录、注册、系统门户和不同用户类型的业务逻辑
 """
-
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
+from django.db import IntegrityError
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
@@ -26,6 +27,8 @@ def Login(request):
         return HttpResponse(result)  # 返回验证结果
     else:
         return render(request, 'login.html')
+
+
 
 def verify(request):
     """
@@ -143,6 +146,7 @@ def api_orders(request):
 def accept_order(request, order_id):
     try:
         order = Order.objects.get(oid=order_id)
+        #筛选未接取 & 骑手未接订单
         if order.status == 'pending' and not order.rid:
             order.rid = request.user.account.rider
             order.status = 'active'
@@ -152,6 +156,7 @@ def accept_order(request, order_id):
     except Order.DoesNotExist:
         return JsonResponse({'error': '订单不存在'}, status=404)
 
+
 @login_required
 def customer_system(request):
     """客户子系统主页（示例模板）"""
@@ -159,12 +164,28 @@ def customer_system(request):
         return redirect('/login/')
     return render(request, 'customer.html')
 
+
 @login_required
 def merchant_system(request):
-    """商家子系统主页（示例模板）"""
-    if not request.user.is_authenticated:
-        return redirect('/login/')
-    return render(request, 'merchant.html')
+    """
+    商家子系统主页
+    显示商家基本信息
+    """
+    try:
+        # 通过反向关联获取商家信息（Account -> Rider）
+        merchant = request.user.account.merchant
+        context = {
+            'merchant_id': merchant.mid_id,    # 关联的Account主键
+            'merchant_name': merchant.mname,
+            'merchant_phone': merchant.mphone,
+            'merchant_address': merchant.maddress,
+            'merchant_balance': merchant.mbalance
+        }
+        return render(request, 'merchant.html', context)
+    except AttributeError:
+        raise PermissionDenied("非商家账户")  # 权限校验失败
+
+
 
 # 注册相关视图
 def register(request):
@@ -183,7 +204,7 @@ def rider_register(request):
         try:
             data = json.loads(request.body)
             # 获取注册参数
-            username = data.get('username')
+            username = data.get('account')
             password = data.get('password')
             name = data.get('name')
             phone = data.get('phone')
@@ -205,7 +226,7 @@ def rider_register(request):
             # 创建关联账户（设置类型为Rider）
             account = Account.objects.create(
                 user=user,
-                accounttype="Rider"
+                accounttype="rider"
             )
 
             # 创建骑手详细信息（与Account一对一关联）
@@ -230,24 +251,24 @@ def rider_register(request):
 
 def customer_register(request):
     """
-    骑手注册API
-    处理骑手注册的完整流程：
+    客户注册API
+    处理客户注册的完整流程：
     1. 创建Django用户
     2. 创建关联的Account记录
-    3. 创建骑手详细信息
+    3. 创建客户详细信息
     """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             # 获取注册参数
+            name = data.get('name')
             username = data.get('username')
-            account = data.get('account')
             password = data.get('password')
             phone = data.get('phone')
             address = data.get('address')
 
             # 参数校验
-            if not all([username,account , password, phone, address]):
+            if not all([name, username, password, phone, address]):
                 return HttpResponse('缺少必要参数', status=400)
 
             # 用户名唯一性检查
@@ -263,16 +284,16 @@ def customer_register(request):
             # 创建关联账户（设置类型为Rider）
             account = Account.objects.create(
                 user=user,
-                accounttype="Customer"
+                accounttype="customer"
             )
 
             # 创建骑手详细信息（与Account一对一关联）
             Customer.objects.create(
                 cid=account,  # 使用Account作为主键
-                cname=username,
+                cname=name,
                 cphone=phone,
                 caddress=address,
-                cbalance=0
+                cbalance=0.0
             )
 
             # 自动登录新注册用户
@@ -289,10 +310,182 @@ def customer_register(request):
     return render(request, 'customerRegistration.html')
 
 def merchant_register(request):
-    """商家注册页面（示例）"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # 获取注册参数
+            name = data.get('name')#username是Django的账户
+            username = data.get('username')
+            password = data.get('password')
+            phone = data.get('phone')
+            address = data.get('address')
+            balance = 0.0
+
+
+            # 参数校验
+            if not all([name, username, password, phone, address]):
+                return HttpResponse('缺少必要参数', status=400)
+
+            # 用户名唯一性检查
+            if User.objects.filter(username=username).exists():
+                return HttpResponse('账户已存在', status=400)
+
+            # 创建用户（自动处理密码哈希）
+            user = User.objects.create_user(
+                username=username,
+                password=password
+            )
+
+            # 创建关联账户（设置类型为merchant）
+            account = Account.objects.create(
+                user=user,
+                accounttype="merchant"
+            )
+
+            # 创建商家详细信息（与Account一对一关联）
+            Merchant.objects.create(
+                mid=account,  # 使用Account作为主键
+                mname=name,
+                mphone=phone,
+                maddress=address,
+                mbalance=balance
+            )
+
+            # 自动登录新注册用户
+            user = authenticate(username=username, password=password)
+            if user:
+                login(request, user)
+                return HttpResponse('注册成功', status=201)
+
+            return HttpResponse('注册成功，请登录', status=201)
+
+        except Exception as e:
+            return HttpResponse(f'注册失败: {str(e)}', status=400)
+
     return render(request, 'merchantRegistration.html')
 
 def user_logout(request):
     """用户登出功能"""
     logout(request)  # 清除用户会话
     return redirect('/login/')  # 重定向到登录页
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt
+@login_required
+@require_http_methods(["GET", "POST", "DELETE"])  # 保持POST方法
+def dish_api(request, dish_id=None):
+    try:
+        # 获取当前登录用户的关联商家信息。
+        merchant = request.user.account.merchant
+
+        # 如果请求方法是 GET，则获取当前商家的所有菜品信息。
+        if request.method == 'GET':
+            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)# 查询数据库中属于当前商家的所有菜品。
+            data = [{
+                "id": dish.did,                 # 菜品ID
+                "name": dish.dname,             # 菜品名称
+                "price": float(dish.dprice),    # 转换菜品价格为浮点数格式
+                "category": dish.dcategory      # 菜品类别
+            } for dish in dishes]               # 遍历查询到的每个菜品对象，并构建字典。
+
+            print(data)
+            return JsonResponse(data, safe=False)
+
+        #修改菜品
+        if request.method == 'POST' and dish_id:  # 修改逻辑
+            # 验证菜品归属
+            dish = Dishes.objects.get(did=dish_id)
+            Merchantdishes.objects.get(did=dish, mid=merchant)
+
+            data = json.loads(request.body)
+
+            # 更新字段
+            update_fields = []
+            if 'name' in data:
+                dish.dname = data['name']
+                update_fields.append('dname')
+            if 'price' in data:
+                dish.dprice = data['price']
+                update_fields.append('dprice')
+            if 'category' in data:
+                dish.dcategory = data['category']
+                update_fields.append('dcategory')
+
+            if update_fields:
+                dish.save(update_fields=update_fields)
+
+            return JsonResponse({
+                "id": dish.did,
+                "name": dish.dname,
+                "price": float(dish.dprice),
+                "category": dish.dcategory
+            })
+
+        # 如果请求方法是 POST，则创建一个新的菜品并将其关联到当前商家。
+        if request.method == 'POST' and not dish_id:
+            data = json.loads(request.body)# 解析请求体中的 JSON 数据。
+
+            dish = Dishes.objects.create(# 在数据库中创建新的菜品记录。
+                dname=data['name'],
+                dprice=data['price'],
+                dcategory=data.get('category', '')
+            )
+
+            # 创建 Merchantdishes 记录来关联新菜品和商家。
+            Merchantdishes.objects.create(did=dish, mid=merchant)
+
+            return JsonResponse({# 向客户端返回包含新创建菜品信息的 JSON 响应
+                "id": dish.did,
+                "name": dish.dname,
+                "price": float(dish.dprice),
+                "category": dish.dcategory
+            }, status=201)
+
+        # 如果请求方法是 DELETE，则删除指定 ID 的菜品。
+        if request.method == 'DELETE':
+            try:
+                dish = Dishes.objects.get(did=dish_id)                          # 从数据库中获取要删除的菜品。
+                Merchantdishes.objects.get(did=dish, mid=merchant).delete()     # 删除该菜品与商家之间的关联。
+                dish.delete()                                                   # 从数据库中彻底移除该菜品。
+                return JsonResponse({"status": "success"})
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+@login_required
+@require_http_methods(["GET", "POST"])
+def merchant_settings_api(request):
+    try:
+        merchant = request.user.account.merchant
+
+        if request.method == 'GET':
+            return JsonResponse({
+                'name': merchant.mname,
+                'phone': merchant.mphone,
+                'address': merchant.maddress
+            })
+
+        if request.method == 'POST':
+            data = json.loads(request.body)
+
+            # 数据验证
+            if not all([data.get('name'), data.get('phone'), data.get('address')]):
+                return JsonResponse({'error': '所有字段必须填写'}, status=400)
+
+            # 更新数据
+            merchant.mname = data['name']
+            merchant.mphone = data['phone']
+            merchant.maddress = data['address']
+            merchant.save()
+
+            return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

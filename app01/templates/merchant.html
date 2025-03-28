@@ -1,4 +1,3 @@
-<!-- merchant.html 商家系统完整代码 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商家后台</title>
     <style>
-        /* 包含共用样式 */
+        /* 与rider.html保持一致的CSS变量定义 */
+        :root {
+            --sidebar-width: 240px;         /* 侧边栏宽度 */
+            --primary-color: #1A237E;       /* 主色调（深蓝） */
+            --secondary-color: #1976D2;     /* 次色调（亮蓝） */
+            --hover-color: #303F9F;         /* 悬停颜色 */
+            --text-light: #E8EAF6;          /* 浅色文字 */
+        }
+
+        /* 保持与rider.html一致的全局样式 */
         * {
             margin: 0;
             padding: 0;
@@ -14,115 +22,77 @@
             font-family: '微软雅黑', sans-serif;
         }
 
-        /* 整体布局 */
+        /* 主容器布局（与骑手端保持一致） */
         .container {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* 左侧导航栏 */
+        /* 侧边栏样式（同步rider.html参数） */
         .sidebar {
-            width: 240px;
-            background: #1A237E;
-            padding: 20px;
+            width: var(--sidebar-width);
+            background: var(--primary-color);
             position: fixed;
             height: 100%;
-            transition: 0.3s;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
+        /* LOGO样式统一 */
         .logo {
             color: white;
             font-size: 24px;
-            margin-bottom: 40px;
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* 导航菜单样式统一 */
         .nav-menu {
             list-style: none;
-        }
-
-        .nav-item {
-            margin: 15px 0;
+            padding: 20px;
         }
 
         .nav-link {
-            color: #E8EAF6;
+            color: var(--text-light);
             text-decoration: none;
             padding: 12px;
             display: block;
             border-radius: 6px;
-            transition: 0.3s;
+            transition: background 0.3s ease;
         }
 
         .nav-link:hover {
-            background: #303F9F;
+            background: var(--hover-color);
         }
 
-        /* 顶部导航栏 */
+        /* 顶部导航条（保持与骑手端相同布局） */
         .top-nav {
-            background: #1976D2;
+            background: var(--secondary-color);
             height: 60px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             padding: 0 30px;
             position: fixed;
-            width: calc(100% - 240px);
-            left: 240px;
-            transition: 0.3s;
+            width: calc(100% - var(--sidebar-width));
+            left: var(--sidebar-width);
         }
 
-        .user-menu {
-            display: flex;
-            gap: 20px;
-        }
-
-        .user-btn {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .user-btn:hover {
-            background: #1565C0;
-        }
-
-        /* 主内容区域 */
+        /* 主内容区域边距同步 */
         .main-content {
-            margin-left: 240px;
-            margin-top: 60px;
-            padding: 30px;
-            background: #E3F2FD;
-            min-height: calc(100vh - 60px);
-            width: calc(100% - 240px);
-            transition: 0.3s;
+            margin-left: var(--sidebar-width);
+            padding: 90px 30px 30px;
         }
 
-        .order-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .map-container {
-            height: 300px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
+        /* 响应式设计（与骑手端相同断点） */
         @media (max-width: 768px) {
             .sidebar {
-                width: 0;
-                z-index: 100;
+                transform: translateX(-100%);
             }
             .sidebar.active {
-                width: 240px;
+                transform: translateX(0);
             }
             .top-nav {
                 width: 100%;
@@ -130,72 +100,752 @@
             }
             .main-content {
                 margin-left: 0;
-                width: 100%;
+            }
+            .menu-toggle {
+                display: block;
             }
         }
-        /* 新增商家系统专属样式 */
+
+        /* 新增商家专属样式 */
         .dish-form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         .dish-card {
             display: flex;
             justify-content: space-between;
-            padding: 15px;
+            align-items: center;
             background: white;
+            padding: 15px;
             border-radius: 8px;
             margin: 10px 0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* 修改原有.user-btn样式 */
+        .user-btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-btn:hover {
+            background: var(--hover-color);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .user-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 新增专门的上架按钮样式 */
+        .add-dish-btn {
+            background: linear-gradient(135deg, var(--secondary-color), #1565C0);
+            grid-column: span 2;
+            justify-content: center;
+            font-size: 16px;
+            padding: 14px 28px;
+            border-radius: 8px;
+        }
+
+        .add-dish-btn::before {
+            content: "+";
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .danger {
+            background: #d32f2f !important;
+            box-shadow: 0 2px 6px rgba(211, 47, 47, 0.2);
+        }
+
+        .danger:hover {
+            background: #b71c1c !important;
+        }
+
+        /* 菜单开关样式统一 */
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            cursor: pointer;
+            font-size: 24px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* 新增菜品表单样式 */
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .error-msg {
+            color: #ff4444;
+            grid-column: span 2;
+            font-size: 0.9em;
+        }
+
+        .danger {
+            background: #ff4444 !important;
+        }
+
+        /* 菜品卡片布局优化 */
+        .dish-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dish-info {
+            flex-grow: 1;
+        }
+
+        .dish-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 新增编辑表单样式 */
+        .edit-form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .edit-form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+         .settings-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .settings-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .settings-form label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        .settings-form textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        /* 添加加载状态提示 */
+        .loading-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            z-index: 3000;
+        }
     </style>
 </head>
 <body>
-    <div class="menu-toggle">☰</div>
+    <!-- 移动端菜单开关（与骑手端相同结构） -->
+    <button class="menu-toggle" aria-label="切换菜单">☰</button>
+
     <div class="container">
-        <nav class="sidebar">
-            <div class="logo">商家后台</div>
+        <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
+        <nav class="sidebar" aria-label="主菜单">
+            <div class="logo">商家中心</div>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="#" class="nav-link">菜品管理</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">订单管理</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">营业数据</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">店铺设置</a></li>
+                <!-- 使用data-type属性保持与骑手端相同交互逻辑 -->
+                <li><a href="#" class="nav-link" data-type="dishes">菜品管理</a></li>
+                <li><a href="#" class="nav-link" data-type="orders">订单管理</a></li>
+                <li><a href="#" class="nav-link" data-type="settings">店铺设置</a></li>
             </ul>
         </nav>
 
-        <div class="top-nav">
+        <!-- 顶部导航（结构与骑手端一致） -->
+        <header class="top-nav">
             <nav class="user-menu">
-                <span class="user-btn">川味小厨</span>
-                <a href="/login" class="user-btn">退出</a>
+                <span class="user-btn">欢迎您，{{ merchant_name }}</span>
+                <a href="/logout/" class="user-btn">退出</a>
             </nav>
-        </div>
+        </header>
 
+        <!-- 主内容区域（按功能分区） -->
         <main class="main-content">
-            <div class="dish-form">
-                <h3>新增菜品</h3>
-                <input type="text" placeholder="菜品名称" class="input-field">
-                <input type="number" placeholder="价格" class="input-field">
-                <button class="user-btn">上架菜品</button>
-            </div>
+            <!-- 菜品管理区域 -->
+            <section id="dishes" style="display: none;">
+                <h2>菜品管理</h2>
+                <!-- 修改菜品管理区域的表单部分 -->
+                <div class="dish-form">
+                    <h3>新增菜品</h3>
+                    <div class="form-group">
+                        <input type="text" id="dish-name" placeholder="菜品名称" required>
+                        <input type="number" id="dish-price" placeholder="价格" min="0" step="0.01" required>
+                        <select id="dish-category">
+                            <option value="">选择分类</option>
+                            <option value="主食">主食</option>
+                            <option value="饮料">饮料</option>
+                            <option value="小吃">小吃</option>
+                        </select>
+                        <button class="user-btn add-dish-btn">上架菜品</button>
+                        <div class="error-msg" id="dish-error"></div>
+                    </div>
+                </div>
 
-            <div class="dish-card">
-                <div>
-                    <h3>水煮鱼</h3>
-                    <p>价格：¥58</p>
+                <div class="dish-card template" style="display:none;">
+                        <div class="dish-info">
+                            <h3 class="dish-name"></h3>
+                            <p>价格：¥<span class="dish-price"></span></p>
+                            <p>分类：<span class="dish-category">暂无分类</span></p>
+                        </div>
+                        <div class="dish-actions">
+                            <button class="edit-btn user-btn">修改</button>
+                            <button class="delete-btn user-btn danger">下架</button>
+                        </div>
+                    </div>
+
+                <!-- 新增编辑表单模板 -->
+                <div class="edit-form-overlay" style="display: none;">
+                    <div class="edit-form">
+                        <h3>修改菜品信息</h3>
+                        <form id="edit-dish-form">
+                            <div class="form-group">
+                                <input type="text" id="edit-dish-name" required>
+                                <input type="number" id="edit-dish-price" min="0" step="0.01" required>
+                                <select id="edit-dish-category">
+                                    <option value="主食">主食</option>
+                                    <option value="饮料">饮料</option>
+                                    <option value="小吃">小吃</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="user-btn cancel-edit">取消</button>
+                                <button type="submit" class="user-btn confirm-edit">保存修改</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div>
-                    <button class="user-btn">修改</button>
-                    <button class="user-btn" style="background:#ff4444">下架</button>
+
+                <!-- 菜品列表模板 -->
+                <div class="dish-list">
+
                 </div>
-            </div>
+            </section>
+
+            <!-- 订单管理区域（结构与骑手端订单列表相似） -->
+            <section id="orders" style="display: none;">
+                <h2>进行中订单（<span id="active-count">0</span>）</h2>
+                <div class="order-list" id="active-orders-list">
+                    <!-- 模板内容 -->
+                    <div class="order-card template" style="display:none;">
+                        <!-- 模板内容 -->
+                        <div class="order-status">
+                            <span class="status-indicator status-pending"></span>
+                            <span class="status-text">待接单</span>
+                        </div>
+                        <h3 class="order-id">订单号：<span class="value"></span></h3>
+                        <p>商家地址：<span class="merchant-address value"></span></p>
+                        <p>客户地址：<span class="customer-address value"></span></p>
+                        <p>下单时间：<span class="order-time value"></span></p>
+                        <div class="action-buttons">
+                            <button class="accept-btn user-btn">接单</button>
+                            <button class="detail-btn user-btn">详情</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 店铺设置区域 -->
+            <section id="settings" style="display: none;">
+                <h2>店铺设置</h2>
+                <div class="settings-form">
+                    <form id="merchant-settings-form">
+                        <div class="form-group">
+                            <label>店铺名称:  </label>
+                            <input type="text" id="merchant-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话</label>
+                            <input type="tel" id="merchant-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>店铺地址</label>
+                            <textarea id="merchant-address" rows="3" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="user-btn">保存设置</button>
+                        </div>
+                        <div class="error-msg" id="settings-error"></div>
+                    </form>
+                </div>
+            </section>
         </main>
     </div>
 
+
+
     <script>
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
+    // 导航管理类
+    // ===================== 导航管理类 =====================
+    class NavigationManager {
+        constructor() {
+            this.currentSection = null;
+            this.initNavigation();
+            this.initDynamicElements();
+        }
+
+        // --------------- 初始化方法 ---------------
+        initNavigation() {
+            // 绑定导航点击事件
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', e => this.handleNavClick(e));
+            });
+
+            // 初始化显示第一个标签页
+            this.switchSection(this.getInitialSection());
+        }
+
+        initDynamicElements() {
+            // 移动端菜单切换
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                document.body.classList.toggle('no-scroll');
+            });
+
+            // 窗口大小变化监听
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    document.body.classList.remove('no-scroll');
+                }
+            });
+        }
+
+        // --------------- 核心功能方法 ---------------
+        async loadDishes() {
+            try {
+                const response = await fetch('/api/dishes/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+
+                const dishes = await response.json();
+                this.renderDishList(dishes);
+
+            } catch (error) {
+                this.showError('dishes', '加载失败，请刷新重试');
+                console.error('菜品加载失败:', error);
+            }
+        }
+
+        async loadSettings() {
+            try {
+                const response = await fetch('/api/merchant/settings/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+
+                const data = await response.json();
+                document.getElementById('merchant-name').value = data.name || '';
+                document.getElementById('merchant-phone').value = data.phone || '';
+                document.getElementById('merchant-address').value = data.address || '';
+
+            } catch (error) {
+                console.error('加载设置失败:', error);
+                this.showError('settings', '加载设置失败');
+            }
+        }
+
+
+        renderDishList(dishes) {
+            const template = document.querySelector('#dishes .dish-card.template');
+            const dishList = document.querySelector('#dishes .dish-list');
+            dishList.innerHTML = '';
+
+            dishes.forEach(dish => {
+                const clone = template.cloneNode(true);
+                clone.classList.remove('template');
+                clone.style.display = 'flex';
+                clone.dataset.dishId = dish.id;
+
+                // 填充菜品数据
+                clone.querySelector('.dish-name').textContent = dish.name;
+                clone.querySelector('.dish-price').textContent = Number(dish.price).toFixed(2);
+                clone.querySelector('.dish-category').textContent = dish.category || '未分类';
+
+                // 绑定操作事件
+                clone.querySelector('.edit-btn').addEventListener('click', () => this.showEditForm(dish));
+                clone.querySelector('.delete-btn').addEventListener('click', () => this.handleDeleteDish(dish, clone));
+
+                dishList.appendChild(clone);
+            });
+        }
+
+        // --------------- 事件处理方法 ---------------
+        async handleDeleteDish(dish, element) {
+            if (!confirm(`确认删除 ${dish.name}？`)) return;
+
+            try {
+                const response = await fetch(`/api/dishes/${dish.id}/`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                response.ok ? element.remove() : alert('删除失败');
+            } catch (error) {
+                alert('网络错误，请检查连接');
+            }
+        }
+
+        // --------------- 表单操作方法 ---------------
+        async saveDishChanges(dishId, newData) {
+            try {
+                const response = await fetch(`/api/dishes/${dishId}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(newData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '保存失败');
+                }
+
+                await this.loadDishes(); // 关键数据同步点
+                return true;
+
+            } catch (error) {
+                alert(error.message);
+                return false;
+            }
+        }
+
+        // --------------- 辅助方法 ---------------
+        getInitialSection() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('type') || 'dishes';
+        }
+
+        switchSection(sectionId) {
+            document.querySelectorAll('section').forEach(section =>
+                section.style.display = 'none'
+            );
+
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.style.display = 'block';
+                this.currentSection = sectionId;
+                this.loadSectionData(sectionId);
+            }
+
+            // 更新导航激活状态
+            document.querySelectorAll('.nav-link').forEach(link =>
+                link.classList.toggle('active', link.dataset.type === sectionId)
+            );
+        }
+
+
+        handleNavClick(event) {
+            event.preventDefault();
+            const targetSection = event.target.dataset.type;
+            this.switchSection(targetSection);
+            this.updateURL(targetSection);
+        }
+
+
+        updateURL(sectionId) {
+            const newUrl = `${window.location.pathname}?type=${sectionId}`;
+            window.history.pushState({ section: sectionId }, '', newUrl);
+        }
+
+        async loadSectionData(sectionId) {
+            switch (sectionId) {
+                case 'dishes':
+                    await this.loadDishes();
+                    break;
+                case 'orders':
+                    await this.loadOrders();
+                    break;
+                case 'settings':
+                    await this.loadSettings();
+                    break;
+            }
+        }
+
+        // 显示错误信息
+        showError(sectionId, message) {
+            const errorElement = document.querySelector(`#${sectionId} .error-msg`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                setTimeout(() => errorElement.textContent = '', 3000);
+            }
+        }
+
+        showEditForm(dish) {
+            const overlay = document.querySelector('.edit-form-overlay');
+            const form = document.getElementById('edit-dish-form');
+
+            // 填充当前数据
+            document.getElementById('edit-dish-name').value = dish.name;
+            document.getElementById('edit-dish-price').value = dish.price;
+            document.getElementById('edit-dish-category').value = dish.category || '';
+
+            // 显示表单
+            overlay.style.display = 'flex';
+
+            // 保存当前菜品ID
+            form.dataset.dishId = dish.id;
+        }
+
+
+        // 其他模块加载方法（示例）
+        async loadOrders() {
+            console.log('订单加载逻辑...');
+        }
+
+
+    }
+
+    // ===================== 页面初始化 =====================
+    document.addEventListener('DOMContentLoaded', () => {
+        const navigationManager = new NavigationManager();
+        const loadingMask = document.createElement('div');
+        loadingMask.className = 'loading-mask';
+        document.body.appendChild(loadingMask);
+
+        // --------------- 新增菜品事件 ---------------
+        document.querySelector('.add-dish-btn').addEventListener('click', async () => {
+            const nameInput = document.getElementById('dish-name');
+            const priceInput = document.getElementById('dish-price');
+            const categorySelect = document.getElementById('dish-category');
+            const errorDiv = document.getElementById('dish-error');
+
+            errorDiv.textContent = '';
+
+            // 前端验证
+            if (!nameInput.value.trim()) {
+                errorDiv.textContent = '请输入菜品名称';
+                return;
+            }
+            if (isNaN(priceInput.value) || priceInput.value <= 0) {
+                errorDiv.textContent = '请输入有效价格';
+                return;
+            }
+
+            // ======== 第二部分：开始请求时显示 ========
+            loadingMask.style.display = 'block'; // 新增代码
+
+            try {
+                const response = await fetch('/api/dishes/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: nameInput.value.trim(),
+                        price: parseFloat(priceInput.value),
+                        category: categorySelect.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    nameInput.value = '';
+                    priceInput.value = '';
+                    categorySelect.value = '';
+                    await navigationManager.loadDishes();
+                } else {
+                    errorDiv.textContent = data.error || '保存失败';
+                }
+            } catch (error) {
+                errorDiv.textContent = '网络错误，请检查连接';
+            }
+            finally {    // 新增finally块
+                loadingMask.style.display = 'none'; // 新增代码
+            }
         });
+
+        // --------------- 编辑表单事件 ---------------
+        const editForm = document.getElementById('edit-dish-form');
+        const overlay = document.querySelector('.edit-form-overlay');
+        const settingForm = document.getElementById('merchant-settings-form');
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dishId = editForm.dataset.dishId;
+            const newData = {
+                name: document.getElementById('edit-dish-name').value.trim(),
+                price: parseFloat(document.getElementById('edit-dish-price').value),
+                category: document.getElementById('edit-dish-category').value
+            };
+
+            if (await navigationManager.saveDishChanges(dishId, newData)) {
+                overlay.style.display = 'none';
+            }
+        });
+
+        settingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loadingMask.style.display = 'block';
+            const dishId = settingForm.dataset.mid;
+            const formData = {
+                name: document.getElementById('merchant-name').value.trim(),
+                phone: document.getElementById('merchant-phone').value.trim(),
+                address: document.getElementById('merchant-address').value.trim()
+            };
+
+            const errorDiv = document.getElementById('settings-error');
+            errorDiv.textContent = '';
+
+            // 前端验证
+            if (!formData.name) {
+                errorDiv.textContent = '店铺名称不能为空';
+                return;
+            }
+            if (!formData.phone) {
+                errorDiv.textContent = '手机号码不能为空';
+                return;
+            }
+            if (!formData.address) {
+                errorDiv.textContent = '店铺地址不能为空';
+                return;
+            }
+            try {
+                const response = await fetch('/api/merchant/settings/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('设置已保存');
+                    // 更新页面显示
+                    document.querySelector('.user-btn:first-child').textContent = `欢迎您，${formData.name}`;
+                } else {
+                    errorDiv.textContent = data.error || '保存失败';
+                }
+            } catch (error) {
+                errorDiv.textContent = '网络错误，请检查连接';
+            }
+            finally {    // 新增finally块
+                loadingMask.style.display = 'none'; // 新增代码
+            }
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 侧边栏响应式处理
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            document.body.classList.toggle('no-scroll');
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+            }
+        });
+
+
+
+        // 取消按钮
+        document.querySelector('.cancel-edit').addEventListener('click', () => {
+            overlay.style.display = 'none';
+        });
+
+        // 点击遮罩层关闭
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
+    });
+
+    // 处理浏览器历史记录
+    window.addEventListener('popstate', (event) => {
+        if (event.state && event.state.section) {
+            navigationManager.switchSection(event.state.section);
+        }
+    });
+
     </script>
+
 </body>
 </html>
