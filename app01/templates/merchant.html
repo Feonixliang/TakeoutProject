@@ -412,7 +412,7 @@
                 <h2>菜品管理</h2>
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="搜索菜品名称..." id="dish-search">
-                    <button class="user-btn search-btn">
+                    <button class="user-btn search-btn" onclick="handleSearch()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="8"/>
                             <path d="M21 21l-4.35-4.35"/>
@@ -487,6 +487,9 @@
                 </div>
             </section>
 
+
+
+
             <!-- 订单管理区域（结构与骑手端订单列表相似） -->
             <section id="orders" style="display: none;">
                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -516,6 +519,8 @@
                     </div>
                 </div>
             </section>
+
+
 
             <!-- 店铺设置区域 -->
             <section id="settings" style="display: none;">
@@ -551,7 +556,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         // ------------------ 初始化阶段 ------------------
         // 创建导航管理实例
-        const navigationManager = new NavigationManager();
+        window.navigationManager = new NavigationManager();
 
         // 创建加载蒙层
         const loadingMask = document.createElement('div');
@@ -559,6 +564,30 @@
         document.body.appendChild(loadingMask);
 
         // ------------------ 事件绑定阶段 ------------------
+        // 搜索按钮点击事件
+        document.querySelector('.search-btn').addEventListener('click', handleSearch);
+
+        // 输入框实时搜索（带防抖）
+        let searchTimeout;
+        document.getElementById('dish-search').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                handleSearch();
+            }, 300);
+        });
+
+
+        document.querySelector('.dish-list').addEventListener('click', function(e) {
+        if (e.target.classList.contains('edit-btn')) {
+            const dishCard = e.target.closest('.dish-card');
+            const dishId = dishCard.dataset.dishId;
+            handleEditDish(dishId);
+        } else if (e.target.classList.contains('delete-btn')) {
+            const dishCard = e.target.closest('.dish-card');
+            const dishId = dishCard.dataset.dishId;
+            handleDeleteDish(dishId);
+        }
+    });
         // 菜品管理相关事件
         initDishManagement(navigationManager, loadingMask);
 
@@ -621,9 +650,9 @@
         // 加载菜品数据
         async loadDishes() {
             try {
-                const response = await fetch('/api/dishes/', {
-                    method: 'GET',
-                    credentials: 'include'
+                const response = await fetch('/api/dishes/', {  // 修改请求地址
+                method: 'GET',
+                credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
@@ -658,13 +687,29 @@
         /* --------------- 页面渲染方法 --------------- */
         // 渲染菜品列表
         renderDishList(dishes) {
-            const template = document.querySelector('#dishes .dish-card.template');
-            const dishList = document.querySelector('#dishes .dish-list');
+            const dishList = document.querySelector('.dish-list');
             dishList.innerHTML = '';
 
+            if (!dishes || dishes.length === 0) {
+                dishList.innerHTML = '<div class="no-result">未找到相关菜品</div>';
+                return;
+            }
+
             dishes.forEach(dish => {
-                const clone = this.createDishCard(dish, template);
-                dishList.appendChild(clone);
+                const dishCard = document.createElement('div');
+                dishCard.className = 'dish-card';
+                dishCard.innerHTML = `
+                    <div class="dish-info">
+                        <h3 class="dish-name">${dish.name}</h3>
+                        <p>价格：¥${Number(dish.price).toFixed(2)}</p>
+                        <p>分类：${dish.category || '未分类'}</p>
+                    </div>
+                    <div class="dish-actions">
+                        <button class="edit-btn user-btn">修改</button>
+                        <button class="delete-btn user-btn danger">下架</button>
+                    </div>
+                `;
+                dishList.appendChild(dishCard);
             });
         }
 
@@ -1011,6 +1056,36 @@
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) overlay.style.display = 'none';
         });
+    }
+        /* ===================== 搜索功能 ===================== */
+    let currentSearchKeyword = '';
+
+    // 搜索按钮点击事件
+    function handleSearch() {
+        currentSearchKeyword = document.getElementById('dish-search').value.trim();
+        triggerSearch();
+    }
+
+    // 实时输入监听（可选）
+    document.getElementById('dish-search').addEventListener('input', function() {
+        currentSearchKeyword = this.value.trim();
+        triggerSearch();
+    });
+
+    // 触发搜索
+    async function triggerSearch() {
+        try {
+            const keyword = document.getElementById('dish-search').value.trim();
+            const params = new URLSearchParams({ keyword });
+
+            const response = await fetch(`/api/dishes/search/?${params}`);
+            const dishes = await response.json();
+
+            console.log('搜索结果:', dishes);
+            navigationManager.renderDishList(dishes); // 通过实例调用
+        } catch (error) {
+            console.error('搜索失败:', error);
+        }
     }
     </script>
 

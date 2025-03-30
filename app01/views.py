@@ -13,6 +13,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
 import json
+from django.db.models import Q
 
 # 登录相关视图
 def Login(request):
@@ -458,6 +459,42 @@ def dish_api(request, dish_id=None):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+@csrf_exempt
+@login_required
+@require_http_methods(["GET"])
+# views.py
+def search_dishes(request):
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "未登录"}, status=401)
+
+        merchant = request.user.account.merchant
+        keyword = request.GET.get('keyword', '').strip()
+
+        # 基础查询：当前商家的所有菜品
+        query = Q(merchantdishes__mid=merchant)
+
+        # 关键词过滤
+        if keyword:
+            query &= Q(dname__icontains=keyword)
+
+        # 执行查询
+        dishes = Dishes.objects.filter(query).distinct()
+
+        # 序列化数据
+        data = [{
+            "id": dish.did,
+            "name": dish.dname,
+            "price": float(dish.dprice),
+            "category": dish.dcategory or ""
+        } for dish in dishes]
+
+        return JsonResponse(data, safe=False)
+
+    except AttributeError:
+        return JsonResponse({"error": "非商家账户"}, status=403)
+    except Exception as e:
+        return JsonResponse({"error": "服务器错误"}, status=500)
 @csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])

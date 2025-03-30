@@ -44,7 +44,7 @@ urlpatterns = [
     path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
     path('api/dishes/', views.dish_api, name='dish_api'),
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
-
+    path('api/dishes/search/', views.search_dishes, name='search-dishes'),
 
 
 ]
