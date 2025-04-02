@@ -5,402 +5,352 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商家后台</title>
     <style>
-        /* 与rider.html保持一致的CSS变量定义 */
-        :root {
-            --sidebar-width: 240px;         /* 侧边栏宽度 */
-            --primary-color: #1A237E;       /* 主色调（深蓝） */
-            --secondary-color: #1976D2;     /* 次色调（亮蓝） */
-            --hover-color: #303F9F;         /* 悬停颜色 */
-            --text-light: #E8EAF6;          /* 浅色文字 */
-        }
+    /* ========== 携程风格配色方案 ========== */
+    :root {
+        --ctrip-blue: #1A2F6B;         /* 携程品牌蓝 */
+        --ctrip-orange: #4A90E2;
+        {#FF6A00  携程品牌橙#}
+        --ctrip-light-blue: #4A90E2;   /* 辅助蓝色 */
+        --success-green: #4A90E2;
+        --danger-red: #E53935;         /* 警示红 */
+        --bg-light: #F5F7FA;           /* 浅灰背景 */
+        --text-dark: #2D3436;          /* 深灰文字 */
+        --text-light: #FFFFFF;         /* 纯白文字 */
+        --border-color: #DFE3E8;       /* 边框颜色 */
+        --radius-md: 4px;
+        --radius-lg: 8px;
+        --shadow-sm: 0 2px 8px rgba(28, 36, 56, 0.08);
+        --shadow-md: 0 4px 12px rgba(28, 36, 56, 0.12);
+        --shadow-lg: 0 8px 24px rgba(28, 36, 56, 0.16);
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        /* 保持与rider.html一致的全局样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: '微软雅黑', sans-serif;
-        }
+    /* ========== 基础重置 ========== */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', '微软雅黑', sans-serif;
+    }
 
-        /* 主容器布局（与骑手端保持一致） */
-        .container {
-            display: flex;
-            min-height: 100vh;
-            position: relative;
-        }
+    body {
+        background: var(--bg-light);
+        color: var(--text-dark);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+    }
 
-        /* 侧边栏样式（同步rider.html参数） */
+    /* ========== 侧边导航栏 ========== */
+    .sidebar {
+        width: 240px;
+        background: var(--ctrip-blue);
+        position: fixed;
+        height: 100%;
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo {
+        color: var(--text-light);
+        font-size: 20px;
+        font-weight: 500;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .nav-menu {
+        padding: 16px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255,255,255,0.9);
+        padding: 12px 16px;
+        margin: 8px 0;
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .nav-link:hover {
+        background: rgba(255,255,255,0.15);
+        transform: translateX(4px);
+    }
+
+    /* ========== 主内容区 ========== */
+    .main-content {
+        margin-left: 240px;
+        padding: 88px 32px 32px;
+        min-height: 100vh;
+    }
+
+    .top-nav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 240px;
+        height: 64px;
+        background: var(--text-light);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 24px;
+        z-index: 999;
+    }
+
+    /* ========== 按钮样式 ========== */
+    .welcome-btn{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        background: #71a5e6;
+        color: var(--text-light);
+        font-size: 14px;
+        text-decoration: none !important;
+    }
+
+
+    .user-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        background: var(--ctrip-orange);
+        color: var(--text-light);
+        font-size: 14px;
+        text-decoration: none !important;
+    }
+
+    .user-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .user-btn.danger {
+        background: var(--danger-red);
+    }
+
+    .add-dish-btn {
+        background: var(--success-green);
+    }
+
+    /* ========== 分类过滤按钮 ========== */
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        margin: 24px 0;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 6px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        background: var(--text-light);
+        color: var(--text-dark);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 14px;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--ctrip-orange);
+        color: var(--ctrip-orange);
+    }
+
+    .filter-btn.active {
+        background: var(--ctrip-orange);
+        color: var(--text-light);
+        border-color: var(--ctrip-orange);
+    }
+
+    /* ========== 卡片设计 ========== */
+    .dish-card {
+        background: var(--text-light);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        margin: 16px 0;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .dish-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .dish-info h3 {
+        color: var(--ctrip-blue);
+        font-size: 16px;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    .dish-info p {
+        color: #666;
+        font-size: 13px;
+    }
+
+    /* ========== 表单样式 ========== */
+    .dish-form {
+        background: var(--text-light);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 24px;
+        border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+        font-size: 14px;
+        background: var(--text-light);
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--ctrip-orange);
+        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
+    }
+
+    /* ========== 加载动画 ========== */
+    .loading-mask {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.9);
+        display: none;
+        place-items: center;
+        z-index: 2000;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border-color);
+        border-top-color: var(--ctrip-orange);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ========== 错误提示 ========== */
+    .error-msg {
+        padding: 12px 16px;
+        background: #FFF5F5;
+        color: var(--danger-red);
+        border-radius: var(--radius-md);
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #FED7D7;
+        font-size: 14px;
+    }
+
+    /* ========== 编辑表单 ========== */
+    .edit-form-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        place-items: center;
+        z-index: 2000;
+    }
+
+    .edit-form {
+        background: var(--text-light);
+        padding: 24px;
+        border-radius: var(--radius-lg);
+        width: 90%;
+        max-width: 500px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    /* ========== 响应式设计 ========== */
+    @media (max-width: 768px) {
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--primary-color);
-            position: fixed;
-            height: 100%;
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            transform: translateX(-100%);
+            width: 280px;
         }
 
-        /* LOGO样式统一 */
-        .logo {
-            color: white;
-            font-size: 24px;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* 导航菜单样式统一 */
-        .nav-menu {
-            list-style: none;
-            padding: 20px;
-        }
-
-        .nav-link {
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 12px;
-            display: block;
-            border-radius: 6px;
-            transition: background 0.3s ease;
-        }
-
-        .nav-link:hover {
-            background: var(--hover-color);
-        }
-
-        /* 顶部导航条（保持与骑手端相同布局） */
-        .top-nav {
-            background: var(--secondary-color);
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 30px;
-            position: fixed;
-            width: calc(100% - var(--sidebar-width));
-            left: var(--sidebar-width);
-        }
-
-        /* 主内容区域边距同步 */
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 90px 30px 30px;
+            margin-left: 0;
+            padding: 88px 16px 16px;
         }
 
-        /* 响应式设计（与骑手端相同断点） */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .top-nav {
-                width: 100%;
-                left: 0;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-            .menu-toggle {
-                display: block;
-            }
+        .top-nav {
+            left: 0;
+            padding: 0 16px;
         }
 
-        /* 新增商家专属样式 */
-        .dish-form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .dish-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* 修改原有.user-btn样式 */
-        .user-btn {
-            background: var(--secondary-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-btn:hover {
-            background: var(--hover-color);
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .user-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 新增专门的上架按钮样式 */
-        .add-dish-btn {
-            background: linear-gradient(135deg, var(--secondary-color), #1565C0);
-            grid-column: span 2;
-            justify-content: center;
-            font-size: 16px;
-            padding: 14px 28px;
-            border-radius: 8px;
-        }
-
-        .add-dish-btn::before {
-            content: "+";
-            font-size: 20px;
-            line-height: 1;
-        }
-
-        .danger {
-            background: #d32f2f !important;
-            box-shadow: 0 2px 6px rgba(211, 47, 47, 0.2);
-        }
-
-        .danger:hover {
-            background: #b71c1c !important;
-        }
-
-        /* 菜单开关样式统一 */
         .menu-toggle {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1100;
-            cursor: pointer;
-            font-size: 24px;
-            color: #fff;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: none;
+            display: block;
         }
 
-        /* 新增菜品表单样式 */
-        .form-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .form-group input,
-        .form-group select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .error-msg {
-            color: #ff4444;
-            grid-column: span 2;
-            font-size: 0.9em;
-        }
-
-        .danger {
-            background: #ff4444 !important;
-        }
-
-        /* 菜品卡片布局优化 */
-        .dish-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .dish-info {
-            flex-grow: 1;
-        }
-
-        .dish-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* 新增编辑表单样式 */
-        .edit-form-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .edit-form {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .form-actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-        }
-
-         .settings-form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .settings-form .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .settings-form label {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-        .settings-form textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-        }
-
-        /* 添加加载状态提示 */
-        .loading-mask {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.8);
-            display: none;
-            z-index: 3000;
-        }
-
-        /* 新增搜索容器样式 */
-        .search-container {
-            display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            align-items: center;
-        }
-
-        /* 搜索输入框样式 */
-        .search-input {
-            flex: 1;
-            max-width: 400px;
-            padding: 12px 20px;
-            border: 2px solid var(--primary-color);
-            border-radius: 30px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 8px rgba(25, 118, 210, 0.2);
-        }
-
-        /* 搜索按钮样式 */
-        .search-btn {
-            background: var(--secondary-color);
-            padding: 12px 25px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* 分类过滤样式 */
         .filter-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
         }
-
-        .filter-btn {
-            background: var(--text-light);
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .search-container {
-                width: 100%;
-                max-width: none;
-            }
-
-            .filter-group {
-                flex-wrap: wrap;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
-    <!-- 移动端菜单开关（与骑手端相同结构） -->
-    <button class="menu-toggle" aria-label="切换菜单">☰</button>
-
     <div class="container">
         <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
         <nav class="sidebar" aria-label="主菜单">
             <div class="logo">商家中心</div>
             <ul class="nav-menu">
                 <!-- 使用data-type属性保持与骑手端相同交互逻辑 -->
-                <li><a href="#" class="nav-link" data-type="dishes">菜品管理</a></li>
-                <li><a href="#" class="nav-link" data-type="orders">订单管理</a></li>
-                <li><a href="#" class="nav-link" data-type="settings">店铺设置</a></li>
+                <li><a href="#" class="nav-link" data-type="dishes">🍔 菜品管理</a></li>
+                <li><a href="#" class="nav-link" data-type="orders">📦 订单管理</a></li>
+                <li><a href="#" class="nav-link" data-type="settings">⚙️ 店铺设置</a></li>
             </ul>
         </nav>
 
         <!-- 顶部导航（结构与骑手端一致） -->
         <header class="top-nav">
             <nav class="user-menu">
-                <span class="user-btn">欢迎您，{{ merchant_name }}</span>
-                <a href="/logout/" class="user-btn">退出</a>
+                <span class="welcome-btn">👋 欢迎您，{{ merchant_name }}</span>
+                <a href="/logout/" class="welcome-btn">🚪 退出登录</a>
             </nav>
         </header>
 
@@ -443,21 +393,21 @@
                             <option value="小吃">小吃</option>
                         </select>
                         <button class="user-btn add-dish-btn">上架菜品</button>
-                        <div class="error-msg" id="dish-error"></div>
+                        <div class="error-msg" id="dish-error" style="display: none"></div>
                     </div>
                 </div>
 
                 <div class="dish-card template" style="display:none;">
-                        <div class="dish-info">
-                            <h3 class="dish-name"></h3>
-                            <p>价格：¥<span class="dish-price"></span></p>
-                            <p>分类：<span class="dish-category">暂无分类</span></p>
-                        </div>
-                        <div class="dish-actions">
-                            <button class="edit-btn user-btn">修改</button>
-                            <button class="delete-btn user-btn danger">下架</button>
-                        </div>
+                    <div class="dish-info">
+                        <h3 class="dish-name"></h3>
+                        <p>价格：¥<span class="dish-price"></span></p>
+                        <p>分类：<span class="dish-category">暂无分类</span></p>
                     </div>
+                    <div class="dish-actions">
+                        <button class="edit-btn user-btn">修改</button>
+                        <button class="delete-btn user-btn danger">下架</button>
+                    </div>
+                </div>
 
                 <!-- 新增编辑表单模板 -->
                 <div class="edit-form-overlay" style="display: none;">
@@ -481,10 +431,8 @@
                     </div>
                 </div>
 
-                <!-- 菜品列表模板 -->
-                <div class="dish-list">
 
-                </div>
+                <div class="dish-list"></div>
             </section>
 
 
@@ -549,7 +497,10 @@
         </main>
     </div>
 
-
+    <!-- 加载动画蒙层 -->
+    <div class="loading-mask">
+        <div class="loading-spinner"></div>
+    </div>
 
     <script>
     /* ===================== 页面主控制器 ===================== */
