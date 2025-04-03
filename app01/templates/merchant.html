@@ -213,6 +213,49 @@
         font-size: 13px;
     }
 
+    /* 确保搜索容器可见 */
+    .search-container {
+        display: flex;
+        gap: 12px;
+        margin: 16px 0;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        transition: var(--transition);
+    }
+
+    .search-input:focus {
+        border-color: var(--ctrip-orange);
+        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
+    }
+
+    /* 移动端菜单按钮样式 */
+    .menu-toggle {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 2000;
+        display: none;
+        padding: 8px 12px;
+        background: #1A2F6B;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .menu-toggle {
+            display: block;
+        }
+    }
+
     /* ========== 表单样式 ========== */
     .dish-form {
         background: var(--text-light);
@@ -333,7 +376,8 @@
     }
 </style>
 </head>
-<body>
+    <body>
+    <button class="menu-toggle" aria-label="切换菜单">☰</button>
     <div class="container">
         <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
         <nav class="sidebar" aria-label="主菜单">
@@ -397,7 +441,7 @@
                     </div>
                 </div>
 
-                <div class="dish-card template" style="display:none;">
+                <div class="dish-card template" style="display:none;" data-category="{{category}}">
                     <div class="dish-info">
                         <h3 class="dish-name"></h3>
                         <p>价格：¥<span class="dish-price"></span></p>
@@ -503,6 +547,10 @@
     </div>
 
     <script>
+        let currentSearchState = {
+            keyword: '',
+            category: 'all'
+        };
     /* ===================== 页面主控制器 ===================== */
     document.addEventListener('DOMContentLoaded', () => {
         // ------------------ 初始化阶段 ------------------
@@ -514,9 +562,27 @@
         loadingMask.className = 'loading-mask';
         document.body.appendChild(loadingMask);
 
+
+
         // ------------------ 事件绑定阶段 ------------------
         // 搜索按钮点击事件
         document.querySelector('.search-btn').addEventListener('click', handleSearch);
+
+        // 分类按钮点击事件
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 移除所有按钮激活状态
+                document.querySelectorAll('.filter-btn').forEach(b =>
+                    b.classList.remove('active'));
+
+                // 设置当前分类
+                currentSearchState.category = this.dataset.category;
+                this.classList.add('active');
+
+                // 触发搜索
+                triggerSearch();
+            });
+        });
 
         // 输入框实时搜索（带防抖）
         let searchTimeout;
@@ -639,28 +705,32 @@
         // 渲染菜品列表
         renderDishList(dishes) {
             const dishList = document.querySelector('.dish-list');
-            dishList.innerHTML = '';
+            dishList.innerHTML = ''; // 清空现有内容
 
             if (!dishes || dishes.length === 0) {
                 dishList.innerHTML = '<div class="no-result">未找到相关菜品</div>';
                 return;
             }
 
+            // 使用模板创建卡片
+            const template = document.querySelector('.dish-card.template');
             dishes.forEach(dish => {
-                const dishCard = document.createElement('div');
-                dishCard.className = 'dish-card';
-                dishCard.innerHTML = `
-                    <div class="dish-info">
-                        <h3 class="dish-name">${dish.name}</h3>
-                        <p>价格：¥${Number(dish.price).toFixed(2)}</p>
-                        <p>分类：${dish.category || '未分类'}</p>
-                    </div>
-                    <div class="dish-actions">
-                        <button class="edit-btn user-btn">修改</button>
-                        <button class="delete-btn user-btn danger">下架</button>
-                    </div>
-                `;
-                dishList.appendChild(dishCard);
+                const clone = template.cloneNode(true);
+                clone.style.display = 'flex';
+                clone.dataset.dishId = dish.id;
+
+                // 填充数据
+                clone.querySelector('.dish-name').textContent = dish.name;
+                clone.querySelector('.dish-price').textContent = dish.price.toFixed(2);
+                clone.querySelector('.dish-category').textContent = dish.category || '未分类';
+
+                // 绑定事件
+                clone.querySelector('.edit-btn').addEventListener('click', () =>
+                    this.showEditForm(dish));
+                clone.querySelector('.delete-btn').addEventListener('click', () =>
+                    this.handleDeleteDish(dish.id));
+
+                dishList.appendChild(clone);
             });
         }
 
@@ -1010,7 +1080,7 @@
     }
         /* ===================== 搜索功能 ===================== */
     let currentSearchKeyword = '';
-
+    let currentCategory = 'all';
     // 搜索按钮点击事件
     function handleSearch() {
         currentSearchKeyword = document.getElementById('dish-search').value.trim();
@@ -1023,19 +1093,34 @@
         triggerSearch();
     });
 
-    // 触发搜索
+    // 分类过滤处理
+    function handleFilter(category) {
+        // 更新按钮状态
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.category === category);
+        });
+
+        currentCategory = category;
+        triggerSearch();
+    }
+
+    // 增强搜索功能
     async function triggerSearch() {
         try {
-            const keyword = document.getElementById('dish-search').value.trim();
-            const params = new URLSearchParams({ keyword });
+            const params = new URLSearchParams({
+                keyword: document.getElementById('dish-search').value.trim(),
+                category: currentSearchState.category
+            });
 
             const response = await fetch(`/api/dishes/search/?${params}`);
-            const dishes = await response.json();
+            if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
 
-            console.log('搜索结果:', dishes);
-            navigationManager.renderDishList(dishes); // 通过实例调用
+            const dishes = await response.json();
+            window.navigationManager.renderDishList(dishes);
         } catch (error) {
             console.error('搜索失败:', error);
+            document.getElementById('dish-error').style.display = 'block';
+            document.getElementById('dish-error').textContent = '搜索失败，请稍后重试';
         }
     }
     </script>

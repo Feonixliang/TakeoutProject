@@ -459,24 +459,27 @@ def dish_api(request, dish_id=None):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+# 修改views.py中的search_dishes视图
+# views.py 修改搜索视图
 @csrf_exempt
 @login_required
 @require_http_methods(["GET"])
-# views.py
 def search_dishes(request):
     try:
-        if not request.user.is_authenticated:
-            return JsonResponse({"error": "未登录"}, status=401)
-
         merchant = request.user.account.merchant
-        keyword = request.GET.get('keyword', '').strip()
+        keyword = request.GET.get('keyword', '')
+        category = request.GET.get('category', 'all')
 
-        # 基础查询：当前商家的所有菜品
+        # 构建基础查询
         query = Q(merchantdishes__mid=merchant)
 
         # 关键词过滤
         if keyword:
             query &= Q(dname__icontains=keyword)
+
+        # 分类过滤
+        if category != 'all':
+            query &= Q(dcategory=category)
 
         # 执行查询
         dishes = Dishes.objects.filter(query).distinct()
@@ -491,10 +494,8 @@ def search_dishes(request):
 
         return JsonResponse(data, safe=False)
 
-    except AttributeError:
-        return JsonResponse({"error": "非商家账户"}, status=403)
     except Exception as e:
-        return JsonResponse({"error": "服务器错误"}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 @csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])
