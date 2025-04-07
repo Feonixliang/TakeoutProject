@@ -38,6 +38,7 @@ urlpatterns = [
     path('register/customer', views.customer_register,name='customer_register'),
     path('register/merchant', views.merchant_register,name='merchant_register'),
     path('api/merchant/settings/', views.merchant_settings_api),
+    path('api/merchants/', views.merchant_list_api, name='merchant_list'),
 
 
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),

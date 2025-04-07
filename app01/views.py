@@ -159,10 +159,23 @@ def accept_order(request, order_id):
 
 @login_required
 def customer_system(request):
-    """客户子系统主页（示例模板）"""
-    if not request.user.is_authenticated:
-        return redirect('/login/')
-    return render(request, 'customer.html')
+    """
+    客户子系统主页
+    显示客户基本信息
+    """
+    try:
+        # 通过反向关联获取客户信息（Account -> Customer）
+        customer = request.user.account.customer
+        context = {
+            'customer_id': customer.cid_id,    # 关联的Account主键
+            'customer_name': customer.cname,
+            'customer_phone': customer.cphone,
+            'customer_address': customer.caddress,
+            'customer_balance': customer.cbalance
+        }
+        return render(request, 'customer.html', context)
+    except AttributeError:
+        raise PermissionDenied("非客户账户")  # 权限校验失败
 
 
 @login_required
@@ -492,3 +505,25 @@ def merchant_settings_api(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+@require_http_methods(["GET","POST"])
+@login_required
+@login_required
+def merchant_list_api(request):
+    try:
+        merchants = Merchant.objects.all()
+        # for merchant in merchants:
+        #     print("id:", merchant.mid_id,  # 注意这里遍历每个merchant对象
+        #           "name:", merchant.mname,
+        #           "address:", merchant.maddress,
+        #           "phone:", merchant.mphone)
+        data = [{
+            "id": merchant.mid_id,
+            "name": merchant.mname,
+            "address": merchant.maddress,
+            "phone": merchant.mphone
+        } for merchant in merchants]
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        print(f"Error fetching merchants: {str(e)}")  # 添加日志输出
+        return JsonResponse({"error": str(e)}, status=400)
