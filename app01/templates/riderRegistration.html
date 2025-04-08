@@ -69,6 +69,26 @@
             outline: none;
         }
 
+        .form-group label {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            background-color: white;
+            padding: 0 5px;
+            color: #aaa;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus + label,
+        .form-control:not(:placeholder-shown) + label {
+            top: -10px;
+            left: 0;
+            font-size: 12px;
+            color: #007bff;
+        }
+
         .btn-register {
             background: #4a90e2;
             color: white;
@@ -153,71 +173,77 @@
     </style>
 </head>
 <body>
-    <div class="top-nav">
-        <nav class="user-menu">
-            <a href="/login" class="user-btn">登录</a>
-        </nav>
+<div class="top-nav">
+    <nav class="user-menu">
+        <a href="/login" class="user-btn">登录</a>
+    </nav>
+</div>
+
+<div class="register-container">
+    <div class="logo">
+        <img src="{% static "img/hamburger.png" %}" alt="外卖logo">
     </div>
+    <h1>欢迎注册外卖系统 - 骑手</h1>
 
-    <div class="register-container">
-        <div class="logo">
-            <img src="{% static "img/hamburger.png" %}" alt="外卖logo">
+    <form method="post" id="registerForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" name="account" class="form-control" placeholder=" " required>
+            <label for="name">账户</label>
         </div>
-        <h1>欢迎注册外卖系统 - 骑手</h1>
-
-        <form method="post" id="registerForm">
-            {% csrf_token %}
-            <div class="form-group">
-                <input type="text" name="account" class="form-control" placeholder="账户" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" class="form-control" placeholder="密码" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="name" class="form-control" placeholder="真实姓名" required>
-            </div>
-            <div class="form-group">
-                <input type="tel" name="phone" class="form-control" placeholder="手机号" required>
-            </div>
-            <button type="submit" class="btn-register">注册</button>
-        </form>
-
-        <div class="links">
-            <p>已有账号？<a href="/login">立即登录</a></p>
+        <div class="form-group">
+            <input type="password" name="password" class="form-control" placeholder=" " required>
+            <label for="name">密码</label>
         </div>
+        <div class="form-group">
+            <input type="text" name="name" class="form-control" placeholder=" " required>
+            <label for="name">真实姓名</label>
+        </div>
+        <div class="form-group">
+            <input type="tel" name="phone" class="form-control" placeholder=" " required>
+            <label for="name">手机号</label>
+        </div>
+        <button type="submit" class="btn-register">注册</button>
+    </form>
+
+    <div class="links">
+        <p>已有账号？<a href="/login">立即登录</a></p>
     </div>
+</div>
 
-    <script>
-        // 添加AJAX提交
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+<script>
+    // 添加AJAX提交
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        e.preventDefault();
 
-            const formData = {
-                account: this.account.value,
-                password: this.password.value,
-                name: this.name.value,
-                phone: this.phone.value
-            };
+        const formData = {
+            account: this.account.value,
+            password: this.password.value,
+            name: this.name.value,
+            phone: this.phone.value
+        };
 
-            fetch("{% url 'rider_register' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(formData)
-            })
+        fetch("{% url 'rider_register' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(formData)
+        })
             .then(response => {
                 if (response.status === 201) {
                     window.location.href = '/system/rider';
                 } else {
-                    return response.text().then(text => { throw new Error(text) });
+                    return response.text().then(text => {
+                        throw new Error(text)
+                    });
                 }
             })
             .catch(error => {
                 alert(error.message);
             });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>

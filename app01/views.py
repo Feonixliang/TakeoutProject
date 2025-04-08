@@ -26,7 +26,7 @@ def Login(request):
         result = verify(request)
         return HttpResponse(result)  # 返回验证结果
     else:
-        return render(request, 'login.html')
+        return render(request, 'logintest.html')
 
 
 

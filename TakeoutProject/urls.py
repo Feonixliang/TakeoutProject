@@ -46,6 +46,4 @@ urlpatterns = [
     path('api/dishes/', views.dish_api, name='dish_api'),
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
 
-
-
 ]
