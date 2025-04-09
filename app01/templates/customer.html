@@ -300,6 +300,134 @@
             display: none !important;
         }
 
+        /* 点菜界面样式 */
+        #merchant-detail {
+            position: relative;
+        }
+
+        .merchant-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .menu-container {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 20px;
+        }
+
+        .menu-categories {
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 200px);
+        }
+
+        .category-list {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .category-item {
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .category-item.active {
+            background: #E3F2FD;
+            border-radius: 4px;
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plus-btn, .minus-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid #1976D2;
+            background: white;
+            color: #1976D2;
+            cursor: pointer;
+        }
+
+        .plus-btn:hover, .minus-btn:hover {
+            background: #E3F2FD;
+        }
+
+        .cart-sidebar {
+            /* 移除display: none */
+            position: fixed;
+            right: 0;
+            top: 60px;
+            width: 300px;
+            background: white;
+            padding: 20px;
+            height: calc(100vh - 60px);
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+            display: none; /* 通过JavaScript控制显示 */
+        }
+
+        .cart-sidebar {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+            display: block !important;
+            visibility: hidden;  /* 新增 */
+        }
+        .cart-sidebar.active {
+            transform: translateX(0);
+            visibility: visible; /* 新增 */
+        }
+
+        .menu-item {
+            transition: all 0.3s ease;
+            opacity: 1;
+            max-height: 100px;
+            overflow: hidden;
+        }
+
+        .menu-item.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .category-header {
+            transition: all 0.3s ease;
+            padding: 15px 0;
+            margin-top: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .category-header.hidden {
+            opacity: 0;
+            max-height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +447,7 @@
             <nav class="user-menu">
                 <span class="user-btn">欢迎用户:{{ customer_name }}</span>
                 <a href="/login" class="user-btn">退出</a>
+                <a href="#" class="user-btn cart-icon">🛒 购物车</a>
             </nav>
         </div>
 
@@ -326,8 +455,6 @@
 
 
             <!-- 首页内容 -->
-
-
             <section id="home" class="active">
                 <h2>推荐商家</h2>
                     <div class="merchant-list"></div>
@@ -348,7 +475,56 @@
                     </div>
             </section>
 
+            <!-- 点菜界面 -->
+            <section id="merchant-detail" style="display: none;">
+                <div class="merchant-header">
+                    <button class="back-btn user-btn">← 返回</button>
+                    <h2 class="merchant-title"></h2>
+                    <div class="merchant-info">
+                        <span>评分：<span class="merchant-rating"></span></span>
+                        <span>月售：<span class="merchant-monthly-sales"></span></span>
+                    </div>
+                </div>
 
+                <div class="menu-container">
+                    <!-- 左侧菜单分类 -->
+                    <div class="menu-categories">
+                        <div class="category-list"></div>
+                    </div>
+
+                    <!-- 右侧菜品列表 -->
+                    <div class="menu-items">
+                        <div class="menu-item template">
+                            <div class="item-info">
+                                <h3 class="item-name"></h3>
+                                <p class="item-desc"></p>
+                                <div class="item-price">¥<span></span></div>
+                            </div>
+                            <div class="item-controls">
+                                <button class="minus-btn">－</button>
+                                <span class="item-count">0</span>
+                                <button class="plus-btn">＋</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 新增全局模板 -->
+                    <div id="global-templates" style="display: none;">
+                        <div class="menu-item template">
+                            <div class="item-info">
+                                <h3 class="item-name"></h3>
+                                <p class="item-desc"></p>
+                                <div class="item-price">¥<span></span></div>
+                            </div>
+                            <div class="item-controls">
+                                <button class="minus-btn">－</button>
+                                <span class="item-count">0</span>
+                                <button class="plus-btn">＋</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <!-- 订单内容 -->
             <section id="orders">
@@ -389,6 +565,7 @@
         // 导航控制逻辑
         class Navigation {
             constructor() {
+                this.currentView = 'home'; // 新增当前视图状态跟踪
                 this.initNavigation();
                 this.loadInitialData();
             }
@@ -421,16 +598,23 @@
             }
 
             switchSection(sectionId) {
-                // 隐藏所有内容区域
+                // 隐藏所有常规内容区域
                 document.querySelectorAll('section').forEach(section => {
                     section.classList.remove('active');
+                    section.style.display = 'none';
                 });
+
+                // 隐藏商家详情界面
+                document.getElementById('merchant-detail').style.display = 'none';
+
+                // 更新当前视图状态
+                this.currentView = sectionId;
 
                 // 显示目标区域
                 const targetSection = document.getElementById(sectionId);
                 if(targetSection) {
+                    targetSection.style.display = 'block';
                     targetSection.classList.add('active');
-                    this.loadSectionData(sectionId);
                 }
             }
 
@@ -450,9 +634,9 @@
                 clone.querySelector('.merchant-name').textContent = merchant.name;
                 clone.querySelector('.merchant-address').textContent = merchant.address;
 
-                // 绑定点击事件（示例）
+                // 修改点击事件
                 clone.querySelector('.browse-btn').addEventListener('click', () => {
-                    window.location.href = `/merchant/${merchant.id}/`;
+                    this.showMerchantDetail(merchant.id);
                 });
 
                 return clone;
@@ -491,6 +675,222 @@
                 }
             }
 
+            async showMerchantDetail(merchantId) {
+                try {
+                    if(window.cart) window.cart.toggleCart(false);
+                    // 创建新购物车实例并重置状态
+                    window.cart = new Cart(merchantId);
+                    window.cart.clearCart(); // 新增方法用于状态重置
+
+
+                    // 保存当前导航状态
+                    this.previousView = this.currentView;
+                    this.currentView = 'merchant-detail';
+
+                    // 隐藏所有常规section
+                    document.querySelectorAll('section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+
+                    // 显示商家详情界面
+                    document.getElementById('merchant-detail').style.display = 'block';
+
+                    // 清除导航激活状态
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                    });
+
+                    // 获取商家详情和菜单数据
+                   const [merchantRes, menuRes] = await Promise.all([
+                        fetch(`/api/merchants/${merchantId}/`),
+                        fetch(`/api/merchants/${merchantId}/menu/`)
+                    ]);
+
+                    if (!merchantRes.ok || !menuRes.ok) throw new Error('请求失败');
+
+                    const merchantData = await merchantRes.json();
+                    const menuData = await menuRes.json();
+                    console.log('菜单数据:', menuData); // 新增调试信息
+
+                    // 填充商家信息
+                    document.querySelector('.merchant-title').textContent = merchantData.name;
+                    document.querySelector('.merchant-rating').textContent = merchantData.rating;
+                    document.querySelector('.merchant-monthly-sales').textContent = merchantData.monthly_sales;
+
+                    // 渲染分类（使用新返回的categories字段）
+                    this.renderCategories(menuData.categories);
+
+                    // 渲染菜品（使用新结构的menu字段）
+                    this.renderMenuItems(menuData.menu);
+
+                    // 切换界面
+                    this.switchToMerchantDetail();
+
+                    // 初始化购物车（重置）
+                     window.cart = new Cart(merchantId);
+                     document.querySelector('.cart-sidebar').classList.remove('active');
+                }
+                catch (error) {
+                    console.error('加载商家详情失败:', error);
+                    alert('加载商家信息失败，请稍后重试');
+                }
+            }
+
+            backToPrevious() {
+                if(this.previousView) {
+                    this.switchSection(this.previousView);
+                    // 恢复导航激活状态
+                    document.querySelector(`[data-type="${this.previousView}"]`).classList.add('active');
+                }
+            }
+
+
+
+            renderCategories(categories) {
+                const container = document.querySelector('.category-list');
+                container.innerHTML = '';
+
+                categories.forEach(category => {
+                    const div = document.createElement('div');
+                    div.className = 'category-item';
+                    div.textContent = category;
+                    div.dataset.category = category; // 添加数据属性
+                    div.addEventListener('click', (e) => {
+                        // 移除所有active状态
+                        document.querySelectorAll('.category-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        div.classList.add('active');
+                        this.filterMenuByCategory(category); // 改为调用过滤方法
+                    });
+                    container.appendChild(div);
+                });
+
+                if (categories.length > 0) {
+                    container.firstChild.click(); // 默认触发第一个分类
+                }
+            }
+
+            // 新增菜品过滤方法
+            filterMenuByCategory(category) {
+                // 处理分类标题
+                document.querySelectorAll('.category-header').forEach(header => {
+                    if (header.textContent === category) {
+                        header.style.display = 'block';
+                    } else {
+                        header.style.display = 'none';
+                    }
+                });
+
+                // 处理菜品项
+                document.querySelectorAll('.menu-item:not(.template)').forEach(item => {
+                    if (item.dataset.category === category) {
+                        item.style.display = 'flex'; // 显示匹配分类的菜品
+                    } else {
+                        item.style.display = 'none';   // 隐藏其他分类菜品
+                    }
+                });
+
+                // 滚动到顶部
+                document.querySelector('.menu-items').scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            // 在Navigation类中添加以下方法
+            scrollToCategory(category) {
+                const header = document.querySelector(`#category-${category}`);
+                if (header) {
+                    header.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+
+
+            renderMenuItems(menu) {
+                const template = document.querySelector('#global-templates .menu-item.template');
+                const container = document.querySelector('.menu-items');
+                container.innerHTML = '';
+
+                // 清空现有内容但保留模板
+                Array.from(container.children).forEach(child => {
+                    if (!child.classList.contains('template')) {
+                        child.remove();
+                    }
+                });
+
+                // 遍历每个分类
+                Object.entries(menu).forEach(([category, items]) => {
+                    // 添加分类标题
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.className = 'category-header';
+                    categoryHeader.textContent = category;
+                    categoryHeader.dataset.category = category; // 添加数据属性
+                    container.appendChild(categoryHeader);
+
+                    // 添加菜品项
+                    items.forEach(item => {
+                        const clone = this.createMenuItem(template, item);
+                        clone.dataset.category = category; // 为菜品添加分类属性
+                        container.appendChild(clone);
+                    });
+                });
+            }
+
+            createMenuItem(template, item) {
+                if (!template) {
+                    console.error('菜单模板元素未找到');
+                    return document.createElement('div'); // 返回空元素防止崩溃
+                }
+
+                const clone = template.cloneNode(true);
+                clone.classList.remove('template');
+
+                clone.querySelector('.item-name').textContent = item.name;
+                clone.querySelector('.item-price span').textContent = item.price.toFixed(2);
+
+                clone.dataset.itemId = item.id; // 添加数据属性
+                const countSpan = clone.querySelector('.item-count');
+                countSpan.textContent = '0'; // 初始化数量
+
+                // 绑定事件
+                const controls = clone.querySelector('.item-controls');
+                controls.querySelector('.plus-btn').addEventListener('click', () => {
+                    window.cart.addItem(item, 1);
+                });
+                controls.querySelector('.minus-btn').addEventListener('click', () => {
+                    window.cart.removeItem(item.id);
+                });
+                return clone;
+            }
+
+            switchToMerchantDetail() {
+                // 隐藏所有内容区域
+                document.querySelectorAll('section').forEach(section => {
+                    section.classList.remove('active');
+                    section.style.display = 'none';
+                });
+
+                // 显示点菜界面
+                const detailSection = document.getElementById('merchant-detail');
+                detailSection.style.display = 'block';
+                detailSection.classList.add('active');
+
+                // 显示返回按钮
+                document.querySelector('.back-btn').addEventListener('click', () => {
+                    this.switchSection('home');
+                });
+            }
+
+            updateCart(item, change) {
+                // 这里实现购物车更新逻辑
+                console.log(`更新购物车：${item.name} 数量变化：${change}`);
+                // 需要实现具体的购物车逻辑，更新侧边栏等
+            }
+
             //进入商家界面
             showMerchantInterface(){
 
@@ -510,6 +910,187 @@
                 }
             }
         }
+
+        class Cart {
+            constructor(merchantId = null) { // 允许空值初始化
+                this.merchantId = merchantId;
+                this.items = new Map();
+                this.toggleCart(false); // 初始时确保关闭
+                this.initCartEvents();
+                this.updateCartDisplay(); // 初始化时更新显示
+            }
+
+            initCartEvents() {
+                const cartIcon = document.querySelector('.cart-icon');
+                const cartSidebar = document.querySelector('.cart-sidebar');
+
+                // 点击图标切换
+                cartIcon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleCart();
+                });
+
+                // 新增点击外部关闭功能
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.cart-sidebar') &&
+                        !e.target.closest('.cart-icon') &&
+                        cartSidebar.classList.contains('active')) {
+                        this.toggleCart(false);
+                    }
+                });
+            }
+
+            // 新增切换方法
+            toggleCart(forceState) {
+                const cartSidebar = document.querySelector('.cart-sidebar');
+                const newState = forceState !== undefined ?
+                    forceState :
+                    !cartSidebar.classList.contains('active');
+                cartSidebar.classList.toggle('active', newState);
+            }
+
+            // 新增状态重置方法
+            clearCart() {
+                this.items.clear();
+                this.updateCartDisplay();
+            }
+            // 新增事件解绑方法防止重复绑定
+            unbindEvents() {
+                const cartIcon = document.querySelector('.cart-icon');
+                const clone = cartIcon.cloneNode(true);
+                cartIcon.parentNode.replaceChild(clone, cartIcon);
+            }
+
+            addItem(item, quantity = 1) {
+                // 添加商家ID校验
+                if (!this.merchantId) {
+                    alert('请先选择商家');
+                    return;
+                }
+
+                const existing = this.items.get(item.id);
+                if (existing) {
+                    existing.quantity += quantity;
+                } else {
+                    this.items.set(item.id, {...item, quantity: quantity});
+                }
+                this.toggleCart(true);
+                this.updateCartDisplay();
+                this.updateMenuItemQuantity(item.id);
+                this.toggleCart(true);
+                this.updateCartDisplay();
+                //document.querySelector('.cart-sidebar').style.display = 'block'; // 新增
+            }
+
+            removeItem(itemId) {
+                const existing = this.items.get(itemId);
+                if (existing) {
+                    if (existing.quantity > 1) {
+                        existing.quantity -= 1;
+                    } else {
+                        this.items.delete(itemId);
+                    }
+                    this.updateCartDisplay();
+                    this.updateMenuItemQuantity(itemId);
+                    this.updateCartDisplay();
+                }
+            }
+
+            updateCartDisplay() {
+                const container = document.querySelector('.cart-sidebar');
+                container.innerHTML = '<h3>购物车</h3>';
+
+                if (this.items.size === 0) {
+                    container.innerHTML += '<div class="empty-cart">购物车为空</div>';
+                    return;
+                }
+
+                let total = 0;
+                this.items.forEach((item) => {  // 修改参数顺序
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerHTML = `
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>¥${(item.price * item.quantity).toFixed(2)}</span>
+                    `;
+                    container.appendChild(div);
+                    total += item.price * item.quantity;
+                });
+
+                const totalElem = document.createElement('div');
+                totalElem.className = 'cart-total';
+                totalElem.innerHTML = `<strong>总计：¥${total}</strong>`;
+                container.appendChild(totalElem);
+
+                const checkoutBtn = document.createElement('button');
+                checkoutBtn.className = 'user-btn';
+                checkoutBtn.textContent = '去结算';
+                checkoutBtn.addEventListener('click', () => this.checkout());
+                container.appendChild(checkoutBtn);
+            }
+
+            updateMenuItemQuantity(itemId) {
+                // 查找对应的菜单项
+                const menuItem = document.querySelector(`.menu-item[data-item-id="${itemId}"]`);
+                if (menuItem) {
+                    const countSpan = menuItem.querySelector('.item-count');
+                    const quantity = this.items.get(itemId)?.quantity || 0;
+                    countSpan.textContent = quantity;
+                }
+            }
+
+
+            async checkout() {
+                try {
+                    // 格式校验
+                    if(this.items.size === 0) {
+                        alert('购物车为空');
+                        return;
+                    }
+
+                    const orderData = {
+                        merchant_id: this.merchantId,
+                        items: Array.from(this.items.values()).map(item => ({
+                            dish_id: item.id,
+                            quantity: item.quantity
+                        }))
+                    };
+
+                    const response = await fetch('/api/orders/create/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '下单失败');
+                    }
+
+                    const result = await response.json();
+                    alert(`下单成功！\n商家地址：${result.merchant_address}\n配送地址：${result.customer_address}`);
+
+                    this.clearCart();
+                    document.querySelector('.cart-sidebar').classList.remove('active');
+                    window.navigation.backToPrevious(); // 返回上一页
+
+
+                } catch (error) {
+                    console.error('结算失败:', error);
+                    alert('下单失败：' + error.message);
+                }
+            }
+        }
+
+        // 初始化购物车
+        document.addEventListener('DOMContentLoaded', () => {
+            window.navigation = new Navigation(); // 确保全局可访问
+            window.cart = new Cart();
+            new Navigation();
+        });
 
         // 初始化导航系统
         document.addEventListener('DOMContentLoaded', () => {

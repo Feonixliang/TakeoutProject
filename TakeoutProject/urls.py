@@ -40,6 +40,10 @@ urlpatterns = [
     path('api/merchant/settings/', views.merchant_settings_api),
     path('api/merchants/', views.merchant_list_api, name='merchant_list'),
 
+    path('api/merchants/<int:merchant_id>/', views.merchant_detail_api, name='merchant-detail'),
+    path('api/merchants/<int:merchant_id>/menu/', views.merchant_menu_api, name='merchant-menu'),
+    path('api/orders/create/', views.create_order, name='create-order'),
+
 
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
     path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),

@@ -806,7 +806,8 @@
     function initDishManagement(navManager, loadingMask) {
         const addBtn = document.querySelector('.add-dish-btn');
 
-        addBtn.addEventListener('click', async () => {
+        addBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); // 新增这行阻止默认行为
             const nameInput = document.getElementById('dish-name');
             const priceInput = document.getElementById('dish-price');
             const categorySelect = document.getElementById('dish-category');
@@ -814,11 +815,16 @@
             errorDiv.textContent = '';
 
             // 前端验证
-            if (!validateDishForm(nameInput, priceInput, errorDiv)) return;
+            if (!validateDishForm(nameInput, priceInput, categorySelect, errorDiv)) return;
 
             loadingMask.style.display = 'block';
 
             try {
+                console.log('发送菜品创建请求', {
+                    name: nameInput.value.trim(),
+                    price: parseFloat(priceInput.value),
+                    category: categorySelect.value
+                });
                 const response = await fetch('/api/dishes/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -839,6 +845,7 @@
                     errorDiv.textContent = data.error || '保存失败';
                 }
             } catch (error) {
+                console.error('添加菜品错误:', error); // 新增错误日志
                 errorDiv.textContent = '网络错误，请检查连接';
             } finally {
                 loadingMask.style.display = 'none';
@@ -928,13 +935,17 @@
 
 
     // 验证菜品表单
-    function validateDishForm(nameInput, priceInput, errorDiv) {
+    function validateDishForm(nameInput, priceInput, categorySelect, errorDiv) {
         if (!nameInput.value.trim()) {
             errorDiv.textContent = '请输入菜品名称';
             return false;
         }
         if (isNaN(priceInput.value) || priceInput.value <= 0) {
             errorDiv.textContent = '请输入有效价格';
+            return false;
+        }
+        if (!categorySelect.value) { // 新增分类验证
+            errorDiv.textContent = '请选择菜品分类';
             return false;
         }
         return true;
