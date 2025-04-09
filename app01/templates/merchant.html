@@ -5,552 +5,551 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商家后台</title>
     <style>
-    /* ========== 携程风格配色方案 ========== */
-    :root {
-        --ctrip-blue: #1A2F6B;         /* 携程品牌蓝 */
-        --ctrip-orange: #4A90E2;
-        {#FF6A00  携程品牌橙#}
-        --ctrip-light-blue: #4A90E2;   /* 辅助蓝色 */
-        --success-green: #4A90E2;
-        --danger-red: #E53935;         /* 警示红 */
-        --bg-light: #F5F7FA;           /* 浅灰背景 */
-        --text-dark: #2D3436;          /* 深灰文字 */
-        --text-light: #FFFFFF;         /* 纯白文字 */
-        --border-color: #DFE3E8;       /* 边框颜色 */
-        --radius-md: 4px;
-        --radius-lg: 8px;
-        --shadow-sm: 0 2px 8px rgba(28, 36, 56, 0.08);
-        --shadow-md: 0 4px 12px rgba(28, 36, 56, 0.12);
-        --shadow-lg: 0 8px 24px rgba(28, 36, 56, 0.16);
-        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ========== 基础重置 ========== */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', '微软雅黑', sans-serif;
-    }
-
-    body {
-        background: var(--bg-light);
-        color: var(--text-dark);
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-    }
-
-    /* ========== 侧边导航栏 ========== */
-    .sidebar {
-        width: 240px;
-        background: var(--ctrip-blue);
-        position: fixed;
-        height: 100%;
-        box-shadow: var(--shadow-md);
-        z-index: 1000;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .logo {
-        color: var(--text-light);
-        font-size: 20px;
-        font-weight: 500;
-        padding: 20px;
-        text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.15);
-    }
-
-    .nav-menu {
-        padding: 16px;
-    }
-
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: rgba(255,255,255,0.9);
-        padding: 12px 16px;
-        margin: 8px 0;
-        border-radius: var(--radius-md);
-        transition: var(--transition);
-        text-decoration: none;
-        font-size: 14px;
-    }
-
-    .nav-link:hover {
-        background: rgba(255,255,255,0.15);
-        transform: translateX(4px);
-    }
-
-    /* ========== 主内容区 ========== */
-    .main-content {
-        margin-left: 240px;
-        padding: 88px 32px 32px;
-        min-height: 100vh;
-    }
-
-    .top-nav {
-        position: fixed;
-        top: 0;
-        right: 0;
-        left: 240px;
-        height: 64px;
-        background: var(--text-light);
-        box-shadow: var(--shadow-sm);
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        padding: 0 24px;
-        z-index: 999;
-    }
-
-    /* ========== 按钮样式 ========== */
-    .welcome-btn{
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: var(--radius-md);
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-        transition: var(--transition);
-        background: #71a5e6;
-        color: var(--text-light);
-        font-size: 14px;
-        text-decoration: none !important;
-    }
-
-
-    .user-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: var(--radius-md);
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-        transition: var(--transition);
-        background: var(--ctrip-orange);
-        color: var(--text-light);
-        font-size: 14px;
-        text-decoration: none !important;
-    }
-
-    .user-btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .user-btn.danger {
-        background: var(--danger-red);
-    }
-
-    .add-dish-btn {
-        background: var(--success-green);
-    }
-
-    /* ========== 分类过滤按钮 ========== */
-    .filter-group {
-        display: flex;
-        gap: 12px;
-        margin: 24px 0;
-        flex-wrap: wrap;
-    }
-
-    .filter-btn {
-        padding: 6px 16px;
-        border-radius: 16px;
-        border: 1px solid var(--border-color);
-        background: var(--text-light);
-        color: var(--text-dark);
-        cursor: pointer;
-        transition: var(--transition);
-        font-size: 14px;
-    }
-
-    .filter-btn:hover {
-        border-color: var(--ctrip-orange);
-        color: var(--ctrip-orange);
-    }
-
-    .filter-btn.active {
-        background: var(--ctrip-orange);
-        color: var(--text-light);
-        border-color: var(--ctrip-orange);
-    }
-
-    /* ========== 卡片设计 ========== */
-    .dish-card {
-        background: var(--text-light);
-        border-radius: var(--radius-lg);
-        padding: 16px;
-        margin: 16px 0;
-        box-shadow: var(--shadow-sm);
-        transition: var(--transition);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid var(--border-color);
-    }
-
-    .dish-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .dish-info h3 {
-        color: var(--ctrip-blue);
-        font-size: 16px;
-        margin-bottom: 4px;
-        font-weight: 600;
-    }
-
-    .dish-info p {
-        color: #666;
-        font-size: 13px;
-    }
-
-    /* 确保搜索容器可见 */
-    .search-container {
-        display: flex;
-        gap: 12px;
-        margin: 16px 0;
-        width: 100%;
-        max-width: 600px;
-    }
-
-    .search-input {
-        flex: 1;
-        padding: 10px 16px;
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
-        transition: var(--transition);
-    }
-
-    .search-input:focus {
-        border-color: var(--ctrip-orange);
-        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
-    }
-
-    /* 移动端菜单按钮样式 */
-    .menu-toggle {
-        position: fixed;
-        top: 16px;
-        left: 16px;
-        z-index: 2000;
-        display: none;
-        padding: 8px 12px;
-        background: #1A2F6B;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-        .menu-toggle {
-            display: block;
+        /* ========== 携程风格配色方案 ========== */
+        :root {
+            --ctrip-blue: #1A2F6B; /* 携程品牌蓝 */
+            --ctrip-orange: #4A90E2;
+        {#FF6A00  携程品牌橙#} --ctrip-light-blue: #4A90E2; /* 辅助蓝色 */
+            --success-green: #4A90E2;
+            --danger-red: #E53935; /* 警示红 */
+            --bg-light: #F5F7FA; /* 浅灰背景 */
+            --text-dark: #2D3436; /* 深灰文字 */
+            --text-light: #FFFFFF; /* 纯白文字 */
+            --border-color: #DFE3E8; /* 边框颜色 */
+            --radius-md: 4px;
+            --radius-lg: 8px;
+            --shadow-sm: 0 2px 8px rgba(28, 36, 56, 0.08);
+            --shadow-md: 0 4px 12px rgba(28, 36, 56, 0.12);
+            --shadow-lg: 0 8px 24px rgba(28, 36, 56, 0.16);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-    }
 
-    /* ========== 表单样式 ========== */
-    .dish-form {
-        background: var(--text-light);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 24px;
-        border: 1px solid var(--border-color);
-    }
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', '微软雅黑', sans-serif;
+        }
 
-    .form-group {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-top: 16px;
-    }
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    input, select, textarea {
-        width: 100%;
-        padding: 10px 14px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        transition: var(--transition);
-        font-size: 14px;
-        background: var(--text-light);
-    }
-
-    input:focus, select:focus {
-        outline: none;
-        border-color: var(--ctrip-orange);
-        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
-    }
-
-    /* ========== 加载动画 ========== */
-    .loading-mask {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255,255,255,0.9);
-        display: none;
-        place-items: center;
-        z-index: 2000;
-    }
-
-    .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid var(--border-color);
-        border-top-color: var(--ctrip-orange);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* ========== 错误提示 ========== */
-    .error-msg {
-        padding: 12px 16px;
-        background: #FFF5F5;
-        color: var(--danger-red);
-        border-radius: var(--radius-md);
-        margin-top: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border: 1px solid #FED7D7;
-        font-size: 14px;
-    }
-
-    /* ========== 编辑表单 ========== */
-    .edit-form-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        display: none;
-        place-items: center;
-        z-index: 2000;
-    }
-
-    .edit-form {
-        background: var(--text-light);
-        padding: 24px;
-        border-radius: var(--radius-lg);
-        width: 90%;
-        max-width: 500px;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--border-color);
-    }
-
-    /* ========== 响应式设计 ========== */
-    @media (max-width: 768px) {
+        /* ========== 侧边导航栏 ========== */
         .sidebar {
-            transform: translateX(-100%);
-            width: 280px;
+            width: 240px;
+            background: var(--ctrip-blue);
+            position: fixed;
+            height: 100%;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .logo {
+            color: var(--text-light);
+            font-size: 20px;
+            font-weight: 500;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-menu {
+            padding: 16px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        /* ========== 主内容区 ========== */
         .main-content {
-            margin-left: 0;
-            padding: 88px 16px 16px;
+            margin-left: 240px;
+            padding: 88px 32px 32px;
+            min-height: 100vh;
         }
 
         .top-nav {
-            left: 0;
-            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 240px;
+            height: 64px;
+            background: var(--text-light);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            z-index: 999;
         }
 
-        .menu-toggle {
-            display: block;
-        }
-
-        .filter-group {
+        /* ========== 按钮样式 ========== */
+        .welcome-btn {
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            background: #71a5e6;
+            color: var(--text-light);
+            font-size: 14px;
+            text-decoration: none !important;
         }
-    }
-</style>
+
+
+        .user-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            background: var(--ctrip-orange);
+            color: var(--text-light);
+            font-size: 14px;
+            text-decoration: none !important;
+        }
+
+        .user-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-btn.danger {
+            background: var(--danger-red);
+        }
+
+        .add-dish-btn {
+            background: var(--success-green);
+        }
+
+        /* ========== 分类过滤按钮 ========== */
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--text-light);
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--ctrip-orange);
+            color: var(--ctrip-orange);
+        }
+
+        .filter-btn.active {
+            background: var(--ctrip-orange);
+            color: var(--text-light);
+            border-color: var(--ctrip-orange);
+        }
+
+        /* ========== 卡片设计 ========== */
+        .dish-card {
+            background: var(--text-light);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .dish-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .dish-info h3 {
+            color: var(--ctrip-blue);
+            font-size: 16px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .dish-info p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        /* 确保搜索容器可见 */
+        .search-container {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--ctrip-orange);
+            box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
+        }
+
+        /* 移动端菜单按钮样式 */
+        .menu-toggle {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 2000;
+            display: none;
+            padding: 8px 12px;
+            background: #1A2F6B;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* ========== 表单样式 ========== */
+        .dish-form {
+            background: var(--text-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            font-size: 14px;
+            background: var(--text-light);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--ctrip-orange);
+            box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
+        }
+
+        /* ========== 加载动画 ========== */
+        .loading-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            place-items: center;
+            z-index: 2000;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--ctrip-orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ========== 错误提示 ========== */
+        .error-msg {
+            padding: 12px 16px;
+            background: #FFF5F5;
+            color: var(--danger-red);
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #FED7D7;
+            font-size: 14px;
+        }
+
+        /* ========== 编辑表单 ========== */
+        .edit-form-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            place-items: center;
+            z-index: 2000;
+        }
+
+        .edit-form {
+            background: var(--text-light);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 88px 16px 16px;
+            }
+
+            .top-nav {
+                left: 0;
+                padding: 0 16px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .filter-group {
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
-    <body>
-    <button class="menu-toggle" aria-label="切换菜单">☰</button>
-    <div class="container">
-        <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
-        <nav class="sidebar" aria-label="主菜单">
-            <div class="logo">商家中心</div>
-            <ul class="nav-menu">
-                <!-- 使用data-type属性保持与骑手端相同交互逻辑 -->
-                <li><a href="#" class="nav-link" data-type="dishes">🍔 菜品管理</a></li>
-                <li><a href="#" class="nav-link" data-type="orders">📦 订单管理</a></li>
-                <li><a href="#" class="nav-link" data-type="settings">⚙️ 店铺设置</a></li>
-            </ul>
+<body>
+<button class="menu-toggle" aria-label="切换菜单">☰</button>
+<div class="container">
+    <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
+    <nav class="sidebar" aria-label="主菜单">
+        <div class="logo">商家中心</div>
+        <ul class="nav-menu">
+            <!-- 使用data-type属性保持与骑手端相同交互逻辑 -->
+            <li><a href="#" class="nav-link" data-type="dishes">🍔 菜品管理</a></li>
+            <li><a href="#" class="nav-link" data-type="orders">📦 订单管理</a></li>
+            <li><a href="#" class="nav-link" data-type="settings">⚙️ 店铺设置</a></li>
+        </ul>
+    </nav>
+
+    <!-- 顶部导航（结构与骑手端一致） -->
+    <header class="top-nav">
+        <nav class="user-menu">
+            <span class="welcome-btn">👋 欢迎您，{{ merchant_name }}</span>
+            <a href="/logout/" class="welcome-btn">🚪 退出登录</a>
         </nav>
+    </header>
 
-        <!-- 顶部导航（结构与骑手端一致） -->
-        <header class="top-nav">
-            <nav class="user-menu">
-                <span class="welcome-btn">👋 欢迎您，{{ merchant_name }}</span>
-                <a href="/logout/" class="welcome-btn">🚪 退出登录</a>
-            </nav>
-        </header>
-
-        <!-- 主内容区域（按功能分区） -->
-        <main class="main-content">
-            <!-- 菜品管理区域 -->
-            <section id="dishes" style="display: none;">
-                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- 主内容区域（按功能分区） -->
+    <main class="main-content">
+        <!-- 菜品管理区域 -->
+        <section id="dishes" style="display: none;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>菜品管理</h2>
                 <div class="search-container">
                     <input type="text" class="search-input" placeholder="搜索菜品名称..." id="dish-search">
                     <button class="user-btn search-btn" onclick="handleSearch()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
                             <circle cx="11" cy="11" r="8"/>
                             <path d="M21 21l-4.35-4.35"/>
                         </svg>
                         搜索
                     </button>
                 </div>
+            </div>
+
+            <!-- 在菜品表单下方添加分类过滤 -->
+            <div class="filter-group">
+                <button class="filter-btn active" data-category="all">全部</button>
+                <button class="filter-btn" data-category="主食">主食</button>
+                <button class="filter-btn" data-category="饮料">饮料</button>
+                <button class="filter-btn" data-category="小吃">小吃</button>
+            </div>
+
+            <!-- 修改菜品管理区域的表单部分 -->
+            <div class="dish-form">
+                <h3>新增菜品</h3>
+                <div class="form-group">
+                    <input type="text" id="dish-name" placeholder="菜品名称" required>
+                    <input type="number" id="dish-price" placeholder="价格" min="0" step="0.01" required>
+                    <select id="dish-category">
+                        <option value="">选择分类</option>
+                        <option value="主食">主食</option>
+                        <option value="饮料">饮料</option>
+                        <option value="小吃">小吃</option>
+                    </select>
+                    <button class="user-btn add-dish-btn">上架菜品</button>
+                    <div class="error-msg" id="dish-error" style="display: none"></div>
                 </div>
+            </div>
 
-                <!-- 在菜品表单下方添加分类过滤 -->
-                <div class="filter-group">
-                    <button class="filter-btn active" data-category="all">全部</button>
-                    <button class="filter-btn" data-category="主食">主食</button>
-                    <button class="filter-btn" data-category="饮料">饮料</button>
-                    <button class="filter-btn" data-category="小吃">小吃</button>
+            <div class="dish-card template" style="display:none;" data-category="{{ category }}">
+                <div class="dish-info">
+                    <h3 class="dish-name"></h3>
+                    <p>价格：¥<span class="dish-price"></span></p>
+                    <p>分类：<span class="dish-category">暂无分类</span></p>
                 </div>
-
-                <!-- 修改菜品管理区域的表单部分 -->
-                <div class="dish-form">
-                    <h3>新增菜品</h3>
-                    <div class="form-group">
-                        <input type="text" id="dish-name" placeholder="菜品名称" required>
-                        <input type="number" id="dish-price" placeholder="价格" min="0" step="0.01" required>
-                        <select id="dish-category">
-                            <option value="">选择分类</option>
-                            <option value="主食">主食</option>
-                            <option value="饮料">饮料</option>
-                            <option value="小吃">小吃</option>
-                        </select>
-                        <button class="user-btn add-dish-btn">上架菜品</button>
-                        <div class="error-msg" id="dish-error" style="display: none"></div>
-                    </div>
+                <div class="dish-actions">
+                    <button class="edit-btn user-btn">修改</button>
+                    <button class="delete-btn user-btn danger">下架</button>
                 </div>
+            </div>
 
-                <div class="dish-card template" style="display:none;" data-category="{{category}}">
-                    <div class="dish-info">
-                        <h3 class="dish-name"></h3>
-                        <p>价格：¥<span class="dish-price"></span></p>
-                        <p>分类：<span class="dish-category">暂无分类</span></p>
-                    </div>
-                    <div class="dish-actions">
-                        <button class="edit-btn user-btn">修改</button>
-                        <button class="delete-btn user-btn danger">下架</button>
-                    </div>
-                </div>
-
-                <!-- 新增编辑表单模板 -->
-                <div class="edit-form-overlay" style="display: none;">
-                    <div class="edit-form">
-                        <h3>修改菜品信息</h3>
-                        <form id="edit-dish-form">
-                            <div class="form-group">
-                                <input type="text" id="edit-dish-name" required>
-                                <input type="number" id="edit-dish-price" min="0" step="0.01" required>
-                                <select id="edit-dish-category">
-                                    <option value="主食">主食</option>
-                                    <option value="饮料">饮料</option>
-                                    <option value="小吃">小吃</option>
-                                </select>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="user-btn cancel-edit">取消</button>
-                                <button type="submit" class="user-btn confirm-edit">保存修改</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-
-                <div class="dish-list"></div>
-            </section>
-
-
-
-
-            <!-- 订单管理区域（结构与骑手端订单列表相似） -->
-            <section id="orders" style="display: none;">
-                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>进行中订单（<span id="active-count">0</span>）</h2>
-                    <div class="search-container">
-                        <input type="text" class="search-input" placeholder="搜索订单号..." id="order-search">
-                        <button class="user-btn search-btn">搜索</button>
-                    </div>
-                </div>
-
-                <div class="order-list" id="active-orders-list">
-                    <!-- 模板内容 -->
-                    <div class="order-card template" style="display:none;">
-                        <!-- 模板内容 -->
-                        <div class="order-status">
-                            <span class="status-indicator status-pending"></span>
-                            <span class="status-text">待接单</span>
-                        </div>
-                        <h3 class="order-id">订单号：<span class="value"></span></h3>
-                        <p>商家地址：<span class="merchant-address value"></span></p>
-                        <p>客户地址：<span class="customer-address value"></span></p>
-                        <p>下单时间：<span class="order-time value"></span></p>
-                        <div class="action-buttons">
-                            <button class="accept-btn user-btn">接单</button>
-                            <button class="detail-btn user-btn">详情</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-
-            <!-- 店铺设置区域 -->
-            <section id="settings" style="display: none;">
-                <h2>店铺设置</h2>
-                <div class="settings-form">
-                    <form id="merchant-settings-form">
+            <!-- 新增编辑表单模板 -->
+            <div class="edit-form-overlay" style="display: none;">
+                <div class="edit-form">
+                    <h3>修改菜品信息</h3>
+                    <form id="edit-dish-form">
                         <div class="form-group">
-                            <label>店铺名称:  </label>
-                            <input type="text" id="merchant-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>联系电话</label>
-                            <input type="tel" id="merchant-phone" required>
-                        </div>
-                        <div class="form-group">
-                            <label>店铺地址</label>
-                            <textarea id="merchant-address" rows="3" required></textarea>
+                            <input type="text" id="edit-dish-name" required>
+                            <input type="number" id="edit-dish-price" min="0" step="0.01" required>
+                            <select id="edit-dish-category">
+                                <option value="主食">主食</option>
+                                <option value="饮料">饮料</option>
+                                <option value="小吃">小吃</option>
+                            </select>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="user-btn">保存设置</button>
+                            <button type="button" class="user-btn cancel-edit">取消</button>
+                            <button type="submit" class="user-btn confirm-edit">保存修改</button>
                         </div>
-                        <div class="error-msg" id="settings-error"></div>
                     </form>
                 </div>
-            </section>
-        </main>
-    </div>
+            </div>
 
-    <!-- 加载动画蒙层 -->
-    <div class="loading-mask">
-        <div class="loading-spinner"></div>
-    </div>
 
-    <script>
-        let currentSearchState = {
-            keyword: '',
-            category: 'all'
-        };
+            <div class="dish-list"></div>
+        </section>
+
+
+        <!-- 订单管理区域（结构与骑手端订单列表相似） -->
+        <section id="orders" style="display: none;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>进行中订单（<span id="active-count">0</span>）</h2>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="搜索订单号..." id="order-search">
+                    <button class="user-btn search-btn">搜索</button>
+                </div>
+            </div>
+
+            <div class="order-list" id="active-orders-list">
+                <!-- 模板内容 -->
+                <div class="order-card template" style="display:none;">
+                    <!-- 模板内容 -->
+                    <div class="order-status">
+                        <span class="status-indicator status-pending"></span>
+                        <span class="status-text">待接单</span>
+                    </div>
+                    <h3 class="order-id">订单号：<span class="value"></span></h3>
+                    <p>商家地址：<span class="merchant-address value"></span></p>
+                    <p>客户地址：<span class="customer-address value"></span></p>
+                    <p>下单时间：<span class="order-time value"></span></p>
+                    <div class="action-buttons">
+                        <button class="accept-btn user-btn">接单</button>
+                        <button class="detail-btn user-btn">详情</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 店铺设置区域 -->
+        <section id="settings" style="display: none;">
+            <h2>店铺设置</h2>
+            <div class="settings-form">
+                <form id="merchant-settings-form">
+                    <div class="form-group">
+                        <label>店铺名称: </label>
+                        <input type="text" id="merchant-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>联系电话</label>
+                        <input type="tel" id="merchant-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>店铺地址</label>
+                        <textarea id="merchant-address" rows="3" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="user-btn">保存设置</button>
+                    </div>
+                    <div class="error-msg" id="settings-error"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- 加载动画蒙层 -->
+<div class="loading-mask">
+    <div class="loading-spinner"></div>
+</div>
+
+<script>
+    let currentSearchState = {
+        keyword: '',
+        category: 'all'
+    };
     /* ===================== 页面主控制器 ===================== */
     document.addEventListener('DOMContentLoaded', () => {
         // ------------------ 初始化阶段 ------------------
@@ -563,14 +562,13 @@
         document.body.appendChild(loadingMask);
 
 
-
         // ------------------ 事件绑定阶段 ------------------
         // 搜索按钮点击事件
         document.querySelector('.search-btn').addEventListener('click', handleSearch);
 
         // 分类按钮点击事件
         document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 // 移除所有按钮激活状态
                 document.querySelectorAll('.filter-btn').forEach(b =>
                     b.classList.remove('active'));
@@ -586,7 +584,7 @@
 
         // 输入框实时搜索（带防抖）
         let searchTimeout;
-        document.getElementById('dish-search').addEventListener('input', function() {
+        document.getElementById('dish-search').addEventListener('input', function () {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 handleSearch();
@@ -594,17 +592,14 @@
         });
 
 
-        document.querySelector('.dish-list').addEventListener('click', function(e) {
-        if (e.target.classList.contains('edit-btn')) {
-            const dishCard = e.target.closest('.dish-card');
-            const dishId = dishCard.dataset.dishId;
-            handleEditDish(dishId);
-        } else if (e.target.classList.contains('delete-btn')) {
-            const dishCard = e.target.closest('.dish-card');
-            const dishId = dishCard.dataset.dishId;
-            handleDeleteDish(dishId);
-        }
-    });
+        // 事件委托（只需绑定一次）
+        document.querySelector('.dish-list').addEventListener('click', function (e) {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (!deleteBtn) return;
+
+            const dishId = deleteBtn.closest('.dish-card').dataset.dishId;
+
+        });
         // 菜品管理相关事件
         initDishManagement(navigationManager, loadingMask);
 
@@ -664,12 +659,13 @@
         }
 
         /* --------------- 核心功能方法 --------------- */
+
         // 加载菜品数据
         async loadDishes() {
             try {
                 const response = await fetch('/api/dishes/', {  // 修改请求地址
-                method: 'GET',
-                credentials: 'include'
+                    method: 'GET',
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
@@ -702,6 +698,7 @@
         }
 
         /* --------------- 页面渲染方法 --------------- */
+
         // 渲染菜品列表
         renderDishList(dishes) {
             const dishList = document.querySelector('.dish-list');
@@ -754,6 +751,7 @@
         }
 
         /* --------------- 事件处理方法 --------------- */
+
         // 处理导航点击
         handleNavClick(event) {
             event.preventDefault();
@@ -762,23 +760,30 @@
             this.updateURL(targetSection);
         }
 
-        // 处理删除菜品
-        async handleDeleteDish(dish, element) {
-            if (!confirm(`确认删除 ${dish.name}？`)) return;
+        // 在NavigationManager类中修改删除方法
+        async handleDeleteDish(dishId) {
+            if (!confirm(`确认下架该菜品？`)) return;
 
             try {
-                const response = await fetch(`/api/dishes/${dish.id}/`, {
+                const response = await fetch(`/api/dishes/${dishId}/`, { // 确保使用模板字符串
                     method: 'DELETE',
                     credentials: 'include'
                 });
 
-                response.ok ? element.remove() : alert('删除失败');
+                if (response.ok) {
+                    const dishCard = document.querySelector(`[data-dish-id="${dishId}"]`);
+                    if (dishCard) dishCard.remove();
+                    this.showToast("下架成功", "success");
+                } else {
+                    this.showError('dishes', '下架失败: ' + (await response.text()));
+                }
             } catch (error) {
-                alert('网络错误，请检查连接');
+                this.showError('dishes', '网络错误: ' + error.message);
             }
         }
 
         /* --------------- 辅助方法 --------------- */
+
         // 切换功能模块
         switchSection(sectionId) {
             // 隐藏所有模块
@@ -801,7 +806,7 @@
         // 更新浏览器URL
         updateURL(sectionId) {
             const newUrl = `${window.location.pathname}?type=${sectionId}`;
-            window.history.pushState({ section: sectionId }, '', newUrl);
+            window.history.pushState({section: sectionId}, '', newUrl);
         }
 
         // 填充店铺设置表单
@@ -887,7 +892,7 @@
             try {
                 const response = await fetch(`/api/dishes/${dishId}/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify(newData)
                 });
@@ -933,7 +938,7 @@
             try {
                 const response = await fetch('/api/dishes/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify({
                         name: nameInput.value.trim(),
@@ -980,7 +985,7 @@
             try {
                 const response = await fetch('/api/merchant/settings/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify(formData)
                 });
@@ -1078,9 +1083,11 @@
             if (e.target === overlay) overlay.style.display = 'none';
         });
     }
-        /* ===================== 搜索功能 ===================== */
+
+    /* ===================== 搜索功能 ===================== */
     let currentSearchKeyword = '';
     let currentCategory = 'all';
+
     // 搜索按钮点击事件
     function handleSearch() {
         currentSearchKeyword = document.getElementById('dish-search').value.trim();
@@ -1088,7 +1095,7 @@
     }
 
     // 实时输入监听（可选）
-    document.getElementById('dish-search').addEventListener('input', function() {
+    document.getElementById('dish-search').addEventListener('input', function () {
         currentSearchKeyword = this.value.trim();
         triggerSearch();
     });
@@ -1123,7 +1130,7 @@
             document.getElementById('dish-error').textContent = '搜索失败，请稍后重试';
         }
     }
-    </script>
+</script>
 
 </body>
 </html>
