@@ -6,12 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>美食广场</title>
     <style>
+        :root {
+            --ctrip-blue: #10478a;         /* 主品牌蓝 */
+            --ctrip-orange: #4A90E2;       /* 品牌橙 */
+            --success-green: #14C9A2;      /* 成功绿 */
+            --danger-red: #F54E4E;         /* 警示红 */
+            --bg-light: #F5F7FA;           /* 浅灰背景 */
+            --text-dark: #2D3436;          /* 深灰文字 */
+            --text-light: #FFFFFF;         /* 纯白文字 */
+            --border-color: #DFE3E8;       /* 边框颜色 */
+            --radius-md: 4px;              /* 中等圆角 */
+            --radius-lg: 8px;              /* 大圆角 */
+            --shadow-sm: 0 2px 8px rgba(28, 36, 56, 0.08);  /* 小阴影 */
+            --shadow-md: 0 4px 12px rgba(28, 36, 56, 0.12); /* 中等阴影 */
+            --shadow-lg: 0 8px 24px rgba(28, 36, 56, 0.16); /* 大阴影 */
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* 过渡效果 */
+        }
+
         /* 包含与骑手系统相同的共用样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: '微软雅黑', sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', '微软雅黑', sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* 整体布局 */
@@ -23,18 +47,22 @@
         /* 左侧导航栏 */
         .sidebar {
             width: 240px;
-            background: #1A237E;
-            padding: 20px;
+            background: var(--ctrip-blue);
             position: fixed;
             height: 100%;
-            transition: 0.3s;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
         }
 
         .logo {
-            color: white;
-            font-size: 24px;
-            margin-bottom: 40px;
+            color: var(--text-light);
+            font-size: 20px;
+            font-weight: 500;
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
         }
 
         .nav-menu {
@@ -46,31 +74,43 @@
         }
 
         .nav-link {
-            color: #E8EAF6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.9);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
             text-decoration: none;
-            padding: 12px;
-            display: block;
-            border-radius: 6px;
-            transition: 0.3s, opacity 0.2s;
+            font-size: 14px;
         }
 
         .nav-link:hover {
-            background: #303F9F;
+            background: rgba(255,255,255,0.15);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 4px solid var(--ctrip-orange);
         }
 
         /* 顶部导航栏 */
         .top-nav {
-            z-index: 1000; /* 确保位于最顶层 */
-            background: #1976D2;
-            height: 60px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 240px;
+            height: 64px;
+            background: var(--text-light);
+            box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding: 0 30px;
-            position: fixed;
-            width: calc(100% - 240px);
-            left: 240px;
-            transition: 0.3s;
+            padding: 0 24px;
+            z-index: 999;
+            transition: left 0.3s;
         }
 
         .user-menu {
@@ -79,46 +119,131 @@
         }
 
         .user-btn {
-            color: white;
-            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 16px;
-            border-radius: 4px;
-            transition: 0.3s;
+            border-radius: var(--radius-md);
+            border: none;
             cursor: pointer;
-            background-color: #1976D2;
+            font-weight: 500;
+            transition: var(--transition);
+            background: var(--ctrip-orange);
+            color: var(--text-light);
+            font-size: 14px;
         }
 
         .user-btn:hover {
-            background: #10478a;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
         /* 主内容区域 */
         .main-content {
-            margin-top: 60px; /* 保持与顶部导航间距 */
             margin-left: 240px;
-            padding: 30px;
-            background: #E3F2FD;
-            min-height: calc(100vh - 60px);
+            padding: 88px 32px 32px;
+            min-height: 100vh;
+            transition: margin 0.3s;
             width: calc(100% - 240px);
-            transition: 0.3s;
         }
 
-        .merchant-order-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            margin: 20px 0;
+        .merchant-card {
+            width: 100%;
             padding: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border-left: 4px solid transparent;
+            margin-bottom: 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        .merchant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
-        .map-container {
-            height: 300px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            margin: 15px 0;
+        .merchant-info h3 {
+            color: var(--ctrip-blue);
+            font-size: 18px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--ctrip-orange);
+            padding-bottom: 8px;
         }
+
+        .merchant-info p {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+
+        .browse-btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            border-radius: 20px;
+            background: var(--ctrip-blue);
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+        .browse-btn:hover {
+            background: var(--ctrip-orange);
+            transform: scale(1.05);
+        }
+
+        /* ========== 点菜界面 ========== */
+        .menu-container {
+            display: grid;
+            grid-template-columns: minmax(160px, 200px) minmax(300px, 1fr); /* 设置合理的最小最大宽度 */
+            gap: 24px;
+            align-items: start; /* 顶部对齐 */
+            margin-top: 32px;
+        }
+        .menu-item {
+            background: var(--text-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-price {
+            font-size: 16px;
+            color: var(--ctrip-orange);
+            font-weight: 600;
+        }
+        .plus-btn, .minus-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--ctrip-blue);
+            color: var(--text-light);
+            border: none;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        .plus-btn:hover, .minus-btn:hover {
+            background: var(--ctrip-orange);
+            transform: scale(1.1);
+        }
+
+        /* ========== 购物车侧边栏 ========== */
+        .cart-sidebar {
+            z-index: 1000;
+            background: var(--text-light);
+            box-shadow: var(--shadow-lg);
+            width: 320px;
+            padding: 24px;
+            border-left: 3px solid var(--ctrip-orange);
+        }
+        .cart-sidebar h3 {
+            color: var(--ctrip-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
 
         @media (max-width: 768px) {
             .sidebar {
@@ -137,25 +262,7 @@
                 width: 100%;
             }
         }
-        /* 新增顾客系统专属样式 */
-        .restaurant-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .menu-item {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
+
         .cart-sidebar {
             position: fixed;
             right: 0;
@@ -174,16 +281,6 @@
             margin-top: 20px;
         }
 
-        .restaurant-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
         .restaurant-info h3 {
             color: #1A237E;
             margin-bottom: 8px;
@@ -193,12 +290,6 @@
             color: #666;
             font-size: 0.9em;
             line-height: 1.5;
-        }
-
-        .restaurant-stats {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
         }
 
         .stat-item {
@@ -220,34 +311,6 @@
             background: #303F9F;
         }
 
-        /* 商家卡片增强样式 */
-        .merchant-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #e0e0e0;
-        }
-        .merchant-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-        }
-        .restaurant-info h3 {
-            color: #1A237E;
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-            border-bottom: 2px solid #FFC107;
-            padding-bottom: 8px;
-            display: inline-block;
-        }
-        .restaurant-info p {
-            color: #616161;
-            font-size: 0.95rem;
-            margin: 8px 0;
-            line-height: 1.6;
-        }
         .merchant-stats {
             display: flex;
             gap: 12px;
@@ -272,24 +335,7 @@
             font-weight: bold;
             margin-right: 6px;
         }
-        .browse-btn {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .browse-btn:hover {
-            background: #1976D2;
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(33,150,243,0.3);
-        }
+
         .browse-btn:active {
             transform: scale(0.98);
         }
@@ -297,9 +343,11 @@
         .merchant-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+            gap: 24px;
+            width: 100%;
         }
+
+
         /* 模板标记隐藏 */
         .merchant-card.template {
             display: none !important;
@@ -312,13 +360,17 @@
 
         .merchant-header {
             position: sticky;
-            top: 60px; /* 固定在顶部导航下方 */
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
+            top: 64px;
+            z-index: 800; /* 保持较高层级 */
+            background: var(--text-light);
+            padding: 24px;
+            margin-bottom: 20px; /* 增加底部间距 */
+        }
+
+        .merchant-title {
+            font-size: 24px;
+            color: var(--ctrip-blue);
+            margin-bottom: 12px;
         }
 
         .menu-container {
@@ -331,22 +383,24 @@
 
         .menu-categories {
             position: sticky;
-            top: 180px; /* 60px顶部导航 + 60px商家标题 + 60px余量 */
-            height: calc(100vh - 240px); /* 动态计算高度 */
-            align-self: start; /* 防止高度拉伸 */
-            z-index: 900; /* 低于顶部导航 */
+            top: 180px; /* 在商家头部下方留出足够空间 */
+            height: calc(100vh - 200px); /* 调整容器高度 */
+            z-index: 700; /* 确保在商家头部之下 */
         }
 
         .category-list {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
+            background: var(--text-light);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .category-item {
-            padding: 12px;
-            cursor: pointer;
-            transition: 0.3s;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: var(--radius-md);
         }
 
         .category-item.active {
@@ -354,10 +408,20 @@
             border-radius: 4px;
         }
 
+        .category-header {
+            grid-column: 1 / -1; /* 跨全部列 */
+            font-size: 18px;
+            color: var(--ctrip-blue);
+            padding: 16px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin: 8px 0 16px;
+            width: 100%;
+        }
+
         .menu-items {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 修正列宽 */
+            gap: 16px;
         }
 
         .menu-item {
@@ -366,7 +430,7 @@
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+
         }
 
         .item-controls {
@@ -399,15 +463,12 @@
             padding: 20px;
             height: calc(100vh - 60px);
             box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-            display: none; /* 通过JavaScript控制显示 */
-        }
-
-        .cart-sidebar {
             transition: transform 0.3s ease-in-out;
             transform: translateX(100%);
             display: block !important;
             visibility: hidden;  /* 新增 */
         }
+
         .cart-sidebar.active {
             transform: translateX(0);
             visibility: visible; /* 新增 */
@@ -960,9 +1021,18 @@
 
             // 新增状态重置方法
             clearCart() {
+                // 重置所有商品数量显示
+                this.items.forEach((_, itemId) => {
+                    const menuItem = document.querySelector(`.menu-item[data-item-id="${itemId}"]`);
+                    if (menuItem) {
+                        menuItem.querySelector('.item-count').textContent = '0';
+                    }
+                });
+
                 this.items.clear();
                 this.updateCartDisplay();
             }
+
             // 新增事件解绑方法防止重复绑定
             unbindEvents() {
                 const cartIcon = document.querySelector('.cart-icon');
@@ -1084,6 +1154,12 @@
 
                     this.clearCart();
                     document.querySelector('.cart-sidebar').classList.remove('active');
+
+                    // 强制更新所有菜单项显示
+                    document.querySelectorAll('.menu-item').forEach(item => {
+                        item.querySelector('.item-count').textContent = '0';
+                    });
+
                     window.navigation.backToPrevious(); // 返回上一页
 
 
