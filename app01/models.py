@@ -174,9 +174,7 @@ class Order(models.Model):
     mid = models.ForeignKey(Merchant, models.DO_NOTHING, db_column='MId')  # Field name made lowercase.
     rid = models.ForeignKey('Rider', models.DO_NOTHING, db_column='RId', blank=True, null=True)  # Field name made lowercase.
     totalprice = models.DecimalField(db_column='TotalPrice', max_digits=10, decimal_places=2)  # Field name made lowercase.
-    status = models.CharField(max_length=9, blank=True, null=True)
-    merchant_address = models.CharField(max_length=200)
-    customer_address = models.CharField(max_length=200)
+    status = models.CharField(max_length=10, blank=True, null=True,default='pending')
 
     class Meta:
         managed = False
@@ -184,13 +182,14 @@ class Order(models.Model):
 
 
 class Orderdishes(models.Model):
-    oid = models.OneToOneField(Order, models.DO_NOTHING, db_column='OId', primary_key=True)  # Field name made lowercase.
-    did = models.ForeignKey(Dishes, models.DO_NOTHING, db_column='DId', blank=True, null=True)  # Field name made lowercase.
-    quantity = models.IntegerField(db_column='Quantity')  # Field name made lowercase.
+    oid = models.ForeignKey(Order, models.DO_NOTHING, db_column='OId')
+    did = models.ForeignKey(Dishes, models.DO_NOTHING, db_column='DId')
+    quantity = models.IntegerField(db_column='Quantity')
 
     class Meta:
         managed = False
         db_table = 'orderdishes'
+        unique_together = (('oid', 'did'),)  # 联合唯一约束
 
 
 class Rider(models.Model):

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
@@ -552,3 +552,136 @@ def merchant_list_api(request):
     except Exception as e:
         print(f"Error fetching merchants: {str(e)}")  # 添加日志输出
         return JsonResponse({"error": str(e)}, status=400)
+
+
+# views.py 新增
+@login_required
+def merchant_menu_api(request, merchant_id):
+    """获取商家菜单"""
+    try:
+        # 获取商家对象
+        merchant = Merchant.objects.get(mid_id=merchant_id)
+        dishes = Dishes.objects.filter(
+            merchantdishes__mid=merchant
+        )
+
+        # 按分类组织数据
+        categories = {}
+        for dish in dishes:
+            category = dish.dcategory or '未分类'
+            if category not in categories:
+                categories[category] = []
+            categories[category].append({
+                'id': dish.did,
+                'name': dish.dname,
+                'price': float(dish.dprice)
+            })
+
+        return JsonResponse({
+            'merchant': {
+                'id': merchant.mid_id,
+                'name': merchant.mname,
+                'address': merchant.maddress
+            },
+            'categories': list(categories.keys()),  # 新增分类列表
+            'menu': categories
+        })
+
+    except Merchant.DoesNotExist:
+        return JsonResponse({'error': '商家不存在'}, status=404)
+
+
+@login_required
+def merchant_detail_api(request, merchant_id):
+    """获取商家详情"""
+    try:
+        merchant = Merchant.objects.get(mid_id=merchant_id)
+        return JsonResponse({
+            'id': merchant.mid_id,
+            'name': merchant.mname,
+            'address': merchant.maddress,
+            'phone': merchant.mphone,
+            'rating': 4.8,  # 示例数据，需根据实际业务添加评分逻辑
+            'monthly_sales': 1000
+        })
+    except Merchant.DoesNotExist:
+        return JsonResponse({'error': '商家不存在'}, status=404)
+
+
+# 在views.py的create_order视图中进行如下修改
+@csrf_exempt
+@login_required
+def create_order(request):
+    """创建订单"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        customer = request.user.account.customer
+        data = json.loads(request.body)
+
+        # 验证数据格式
+        required_fields = ['merchant_id', 'items']
+        if not all(field in data for field in required_fields):
+            return JsonResponse({'error': '缺少必要字段'}, status=400)
+
+        # 获取商家
+        merchant = Merchant.objects.get(mid=data['merchant_id'])
+
+        # 创建订单
+        with transaction.atomic():
+            # 创建主订单（不包含地址字段）
+            order = Order.objects.create(
+                cid=customer,
+                mid=merchant,
+                totalprice=0.00,
+                status='pending'
+            )
+            # 计算总价并创建订单菜品
+            total = 0
+            for item in data['items']:
+                dish = Dishes.objects.get(did=item['dish_id'])
+                quantity = item['quantity']
+
+                # 数据验证
+                if quantity <= 0:
+                    raise ValueError("商品数量必须大于0")
+
+                # 验证菜品是否属于该商家
+                if not Merchantdishes.objects.filter(did=dish, mid=merchant).exists():
+                    raise PermissionDenied("商家没有该菜品")
+
+
+                Orderdishes.objects.create(
+                    oid=order,
+                    did=dish,
+                    quantity=quantity
+                )
+
+                total += float(dish.dprice) * quantity
+
+            # 更新订单总价
+            order.totalprice = total
+            order.save()
+
+            return JsonResponse({
+                'order_id': order.oid,
+                'status': order.status,
+                'total_price': order.totalprice,
+                # 通过外键获取地址
+                'merchant_address': merchant.maddress,  # 直接取商家地址
+                'customer_address': customer.caddress  # 直接取客户地址
+            })
+
+    except Merchant.DoesNotExist:
+        return JsonResponse({'error': '商家不存在'}, status=404)
+    except Dishes.DoesNotExist:
+        return JsonResponse({'error': '菜品不存在'}, status=404)
+    except KeyError as e:
+        return JsonResponse({'error': f'缺少必要参数: {str(e)}'}, status=400)
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except PermissionDenied as e:
+        return JsonResponse({'error': str(e)}, status=403)
+    except Exception as e:
+        return JsonResponse({'error': f'服务器错误: {str(e)}'}, status=500)
