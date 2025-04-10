@@ -3,7 +3,7 @@ Django 视图模块，处理用户认证、系统入口和各类型用户功能�
 包含登录、注册、系统门户和不同用户类型的业务逻辑
 """
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, HttpResponse, redirect
@@ -160,10 +160,16 @@ def accept_order(request, order_id):
 
 @login_required
 def customer_system(request):
-    """客户子系统主页（示例模板）"""
-    if not request.user.is_authenticated:
-        return redirect('/login/')
-    return render(request, 'customer.html')
+    """客户子系统主页"""
+    try:
+        # 获取当前用户的客户信息
+        customer = request.user.account.customer
+        context = {
+            'customer_name': customer.cname
+        }
+        return render(request, 'customer.html', context)
+    except AttributeError:
+        raise PermissionDenied("非客户账户")
 
 
 @login_required
@@ -186,6 +192,33 @@ def merchant_system(request):
     except AttributeError:
         raise PermissionDenied("非商家账户")  # 权限校验失败
 
+
+@login_required
+@require_http_methods(["POST"])
+def change_password_api(request):
+    try:
+        data = json.loads(request.body)
+        user = request.user
+
+        # 验证数据完整性
+        if not all([data.get('old_password'), data.get('new_password')]):
+            return JsonResponse({'error': '所有字段必须填写'}, status=400)
+
+        # 验证旧密码
+        if not user.check_password(data['old_password']):
+            return JsonResponse({'error': '旧密码不正确'}, status=400)
+
+        # 更新密码
+        user.set_password(data['new_password'])
+        user.save()
+
+        # 重新登录保持会话
+        update_session_auth_hash(request, user)
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # 注册相关视图
