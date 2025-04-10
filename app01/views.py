@@ -591,6 +591,53 @@ def merchant_menu_api(request, merchant_id):
         return JsonResponse({'error': '商家不存在'}, status=404)
 
 
+# views.py
+@login_required
+def merchant_orders_api(request):
+    """获取商家订单数据（修复Orderdishes查询问题）"""
+    try:
+        merchant = request.user.account.merchant
+        orders = Order.objects.filter(mid=merchant).select_related('cid', 'rid')
+
+        orders_data = []
+        for order in orders:
+            # 使用values()直接获取需要字段，避免模型id问题
+            dishes = Orderdishes.objects.filter(oid=order).values(
+                'did__dname',  # 菜品名称
+                'quantity',  # 数量
+                'did__dprice'  # 单价
+            )
+
+            dishes_data = [{
+                "name": item['did__dname'],
+                "quantity": item['quantity'],
+                "price": float(item['did__dprice']),
+                "subtotal": float(item['did__dprice'] * item['quantity'])
+            } for item in dishes]
+
+            order_data = {
+                "oid": order.oid,
+                "status": order.get_status_display(),
+                "total_price": float(order.totalprice),
+                "customer_info": {
+                    "name": order.cid.cname,
+                    "phone": order.cid.cphone,
+                    "address": order.cid.caddress
+                },
+                "dishes": dishes_data,
+                "rider_info": {
+                    "name": order.rid.rname if order.rid else None,
+                    "phone": order.rid.rphone if order.rid else None
+                } if order.rid else None
+            }
+            orders_data.append(order_data)
+
+        return JsonResponse(orders_data, safe=False)
+
+    except Exception as e:
+        print(f"Error fetching orders: {str(e)}")
+        return JsonResponse({"error": "服务器内部错误"}, status=500)
+
 @login_required
 def merchant_detail_api(request, merchant_id):
     """获取商家详情"""

@@ -102,12 +102,14 @@
             transition: 0.3s;
         }
 
-        .order-card {
+        .merchant-order-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 24px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid transparent;
         }
 
         .map-container {
@@ -580,6 +582,15 @@
                 document.querySelector('.menu-toggle').addEventListener('click', () => {
                     document.querySelector('.sidebar').classList.toggle('active');
                 });
+
+                // 添加订单过滤事件绑定
+                document.querySelectorAll('#orders .filter-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const target = e.target.closest('.filter-btn');
+                        this.filterOrders(target.dataset.status, target);
+                    });
+                });
+
             }
 
             handleNavClick(event) {

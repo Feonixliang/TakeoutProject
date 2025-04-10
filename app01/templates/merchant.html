@@ -349,6 +349,56 @@
         border: 1px solid var(--border-color);
     }
 
+    #orders .merchant-order-card {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        margin: 16px 0;
+        box-shadow: 0 2px 8px rgba(28, 36, 56, 0.08);
+        border-left: 4px solid transparent;
+    }
+
+    #orders .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #F0F2F5;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    #orders .order-id {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1A2F6B;
+    }
+
+    #orders .order-id .value {
+        color: #4091F7;
+        margin-left: 8px;
+    }
+
+    #orders .order-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 20px;
+    }
+
+    #orders .order-body h4 {
+        font-size: 14px;
+        color: #6B7A8F;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    #global-templates {
+      position: absolute;
+      left: -9999px;
+      visibility: hidden;
+    }
+
     /* ========== 响应式设计 ========== */
     @media (max-width: 768px) {
         .sidebar {
@@ -372,6 +422,222 @@
 
         .filter-group {
             gap: 8px;
+        }
+
+        /* 订单卡片样式 */
+        #orders .merchant-order-card {
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 8px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .order-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-text {
+            font-weight: 500;
+        }
+
+        /* 不同状态的颜色 */
+        #orders [data-status="pending"] .status-dot { background: #f59e0b; }
+        [data-status="active"] .status-dot { background: #3b82f6; }
+        [data-status="completed"] .status-dot { background: #10b981; }
+        [data-status="canceled"] .status-dot { background: #ef4444; }
+
+        .order-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .dishes-items {
+            margin: 8px 0;
+        }
+
+
+        .order-total {
+            text-align: right;
+            font-weight: 600;
+            margin-top: 12px;
+            color: var(--ctrip-blue);
+        }
+
+        .rider-info {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+
+
+        /* 状态标签样式 */
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* 修改后（添加#orders前缀） */
+        #orders [data-status="pending"] {
+            border-left-color: #FFB020;
+        }
+        #orders [data-status="pending"] .order-status {
+            background: #FFF4E5;
+            color: #FFB020;
+        }
+
+        [data-status="active"] {
+            border-left-color: #4091F7;
+        }
+        [data-status="active"] .order-status {
+            background: #E8F2FF;
+            color: #4091F7;
+        }
+
+        [data-status="completed"] {
+            border-left-color: #14C9A2;
+        }
+        [data-status="completed"] .order-status {
+            background: #E6F9F5;
+            color: #14C9A2;
+        }
+
+        [data-status="canceled"] {
+            border-left-color: #F54E4E;
+        }
+        [data-status="canceled"] .order-status {
+            background: #FFEEEE;
+            color: #F54E4E;
+        }
+
+        /* 订单头部布局 */
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F0F2F5;
+        }
+
+        .order-id {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A2F6B;
+        }
+
+        .order-id .value {
+            color: #4091F7;
+            margin-left: 8px;
+        }
+
+        /* 订单主体布局 */
+        .order-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .order-body h4 {
+            font-size: 14px;
+            color: #6B7A8F;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* 客户信息样式 */
+        .customer-info p {
+            margin: 8px 0;
+            color: #4A5568;
+            font-size: 14px;
+        }
+
+        /* 菜品列表样式 */
+        .dishes-items {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .dish-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+            align-items: center;
+        }
+
+        .dish-item:last-child {
+            border-bottom: none;
+        }
+
+        .dish-item span {
+            font-size: 14px;
+            color: #4A5568;
+        }
+
+        /* 总价样式 */
+        .order-total {
+            margin-top: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A2F6B;
+        }
+
+        /* 骑手信息样式 */
+        .rider-info {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .rider-info p {
+            margin: 8px 0;
+            color: #4A5568;
+            font-size: 14px;
+        }
+
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .order-body {
+                grid-template-columns: 1fr;
+            }
+
+            .dish-item {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
         }
     }
 </style>
@@ -442,18 +708,6 @@
                     </div>
                 </div>
 
-                <div class="dish-card template" style="display:none;" data-category="{{category}}">
-                    <div class="dish-info">
-                        <h3 class="dish-name"></h3>
-                        <p>价格：¥<span class="dish-price"></span></p>
-                        <p>分类：<span class="dish-category">暂无分类</span></p>
-                    </div>
-                    <div class="dish-actions">
-                        <button class="edit-btn user-btn">修改</button>
-                        <button class="delete-btn user-btn danger">下架</button>
-                    </div>
-                </div>
-
                 <!-- 新增编辑表单模板 -->
                 <div class="edit-form-overlay" style="display: none;">
                     <div class="edit-form">
@@ -483,37 +737,71 @@
 
 
 
-            <!-- 订单管理区域（结构与骑手端订单列表相似） -->
+            <!-- 订单管理区域 -->
             <section id="orders" style="display: none;">
-                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>进行中订单（<span id="active-count">0</span>）</h2>
-                    <div class="search-container">
-                        <input type="text" class="search-input" placeholder="搜索订单号..." id="order-search">
-                        <button class="user-btn search-btn">搜索</button>
+                <div class="section-header">
+                    <h2>订单管理</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-status="all">全部订单</button>
+                        <button class="filter-btn" data-status="pending">待接单</button>
+                        <button class="filter-btn" data-status="active">配送中</button>
+                        <button class="filter-btn" data-status="completed">已完成</button>
                     </div>
                 </div>
 
-                <div class="order-list" id="active-orders-list">
-                    <!-- 模板内容 -->
-                    <div class="order-card template" style="display:none;">
-                        <!-- 模板内容 -->
-                        <div class="order-status">
-                            <span class="status-indicator status-pending"></span>
-                            <span class="status-text">待接单</span>
-                        </div>
-                        <h3 class="order-id">订单号：<span class="value"></span></h3>
-                        <p>商家地址：<span class="merchant-address value"></span></p>
-                        <p>客户地址：<span class="customer-address value"></span></p>
-                        <p>下单时间：<span class="order-time value"></span></p>
-                        <div class="action-buttons">
-                            <button class="accept-btn user-btn">接单</button>
-                            <button class="detail-btn user-btn">详情</button>
-                        </div>
-                    </div>
+                <!-- 订单列表容器 -->
+                <div class="order-list" id="orders-container">
+                    <!-- 订单模板 -->
+
                 </div>
             </section>
 
+            <div id="global-templates" style="display: none;">
+                <div class="dish-card template" style="display:none;" data-category="{{category}}">
+                    <div class="dish-info">
+                        <h3 class="dish-name"></h3>
+                        <p>价格：¥<span class="dish-price"></span></p>
+                        <p>分类：<span class="dish-category">暂无分类</span></p>
+                    </div>
+                    <div class="dish-actions">
+                        <button class="edit-btn user-btn">修改</button>
+                        <button class="delete-btn user-btn danger">下架</button>
+                    </div>
+                </div>
 
+                <div class="merchant-order-card template" style="display: none;">
+                    <div class="order-header">
+                        <span class="order-id">订单号：<span class="value"></span></span>
+                        <span class="order-status">
+                            <span class="status-dot"></span>
+                            <span class="status-text"></span>
+                        </span>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="customer-info">
+                            <h4>客户信息</h4>
+                            <p>姓名：<span class="customer-name"></span></p>
+                            <p>电话：<span class="customer-phone"></span></p>
+                            <p>地址：<span class="customer-address"></span></p>
+                        </div>
+
+                        <div class="dishes-list">
+                            <h4>菜品详情</h4>
+                            <div class="dishes-items"></div>
+                            <div class="order-total">
+                                总价：¥<span class="total-price"></span>
+                            </div>
+                        </div>
+
+                        <div class="rider-info" style="display: none;">
+                            <h4>骑手信息</h4>
+                            <p>姓名：<span class="rider-name"></span></p>
+                            <p>电话：<span class="rider-phone"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>>
 
             <!-- 店铺设置区域 -->
             <section id="settings" style="display: none;">
@@ -629,6 +917,13 @@
             this.currentSection = null;
             this.initNavigation();
             this.initDynamicElements();
+            this.templates = {
+                dish: document.querySelector('#global-templates .dish-card.template'),
+                order: document.querySelector('#global-templates .merchant-order-card.template')
+            };
+            if (!this.templates.dish || !this.templates.order) {
+                console.error('模板元素未初始化');
+            }
         }
 
         /* --------------- 初始化方法 --------------- */
@@ -854,24 +1149,122 @@
             form.dataset.dishId = dish.id;
         }
 
+        /* --------------- 新增筛选核心方法 --------------- */
+        filterOrders(status, target) {
+            // 更新按钮状态
+            document.querySelectorAll('#orders .filter-btn').forEach(b =>
+                b.classList.remove('active')
+            );
+            if(target) target.classList.add('active');
+            // 过滤订单
+            document.querySelectorAll('#orders-container .merchant-order-card').forEach(order => {
+                const shouldShow = status === 'all' || order.dataset.status === status;
+                order.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
         // 订单加载方法（示例）
         async loadOrders() {
             try {
-                const response = await fetch('/api/orders/', {
+                const container = document.getElementById('orders-container');
+                const template = document.querySelector('#global-templates .merchant-order-card.template');
+
+                if (!template) {
+                  throw new Error('未找到订单模板');
+                }
+                container.innerHTML = '<div class="loading-text">加载订单中...</div>';
+
+                const response = await fetch('/api/merchant/orders/', {
                     method: 'GET',
                     credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
                 const orders = await response.json();
-                // 这里可以添加订单渲染逻辑
-                console.log('订单数据:', orders);
+                this.renderOrders(orders);
+                this.filterOrders('all', document.querySelector('#orders .filter-btn[data-status="all"]'));
 
             } catch (error) {
                 console.error('订单加载失败:', error);
                 this.showError('orders', '加载订单失败');
             }
         }
+
+        // 订单渲染方法
+        renderOrders(orders) {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '';
+
+            orders.forEach(order => {
+                const clone = this.templates.order.cloneNode(true);
+                const statusMap = {
+                    "待接单": "pending",
+                    "配送中": "active",
+                    "已完成": "completed",
+                };
+                clone.classList.remove('template');
+                clone.style.display = 'block';
+                clone.dataset.status = order.status.toLowerCase(); // 状态转为小写
+                clone.dataset.status = statusMap[order.status] || order.status.toLowerCase();
+
+                // 填充订单数据
+                clone.querySelector('.order-id .value').textContent = order.oid;
+                clone.querySelector('.status-text').textContent = order.status;
+                clone.querySelector('.order-total .total-price').textContent = order.total_price.toFixed(2);
+                clone.querySelector('.customer-phone').textContent = order.customer_info.phone || '未提供';
+
+                // 填充客户信息
+                clone.querySelector('.customer-name').textContent = order.customer_info.name;
+                clone.querySelector('.customer-address').textContent = order.customer_info.address;
+
+                // 填充菜品信息
+                const dishesContainer = clone.querySelector('.dishes-items');
+                dishesContainer.innerHTML = '';
+                order.dishes.forEach(dish => {
+                    const div = document.createElement('div');
+                    div.className = 'dish-item';
+                    div.innerHTML = `
+                        <span>${dish.name}</span>
+                        <span>数量：${dish.quantity}</span>
+                        <span>单价：¥${dish.price.toFixed(2)}</span>
+                        <span>小计：¥${dish.subtotal.toFixed(2)}</span>
+                    `;
+                    dishesContainer.appendChild(div);
+                });
+
+                // 修改骑手信息显示逻辑
+                if (order.rider_info) {
+                    const riderSection = clone.querySelector('.rider-info');
+                    riderSection.style.display = 'block';  // 移除内联的display:none
+                    riderSection.querySelector('.rider-name').textContent = order.rider_info.name;
+                    riderSection.querySelector('.rider-phone').textContent = order.rider_info.phone;
+                }
+
+                container.appendChild(clone);
+            });
+
+            // 初始化过滤功能（直接定义函数）
+            const filterOrders = (status, target) => { // 增加target参数
+                document.querySelectorAll('#orders .filter-btn').forEach(b =>
+                    b.classList.remove('active'));
+                target.classList.add('active');
+
+                document.querySelectorAll('#orders .merchant-order-card').forEach(order => {
+                    const shouldShow = status === 'all' || order.dataset.status === status;
+                    order.style.display = shouldShow ? 'block' : 'none';
+                });
+            };
+
+            // 绑定过滤按钮事件
+            document.querySelectorAll('#orders .filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterOrders(this.dataset.status, this); // 传递status和target
+                });
+            });
+        }
+
+
+
 
         // 获取初始显示模块
         getInitialSection() {
