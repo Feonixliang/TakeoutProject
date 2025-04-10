@@ -595,17 +595,14 @@
         });
 
 
-        document.querySelector('.dish-list').addEventListener('click', function(e) {
-        if (e.target.classList.contains('edit-btn')) {
-            const dishCard = e.target.closest('.dish-card');
-            const dishId = dishCard.dataset.dishId;
-            handleEditDish(dishId);
-        } else if (e.target.classList.contains('delete-btn')) {
-            const dishCard = e.target.closest('.dish-card');
-            const dishId = dishCard.dataset.dishId;
-            handleDeleteDish(dishId);
-        }
-    });
+        // 事件委托（只需绑定一次）
+        document.querySelector('.dish-list').addEventListener('click', function (e) {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (!deleteBtn) return;
+
+            const dishId = deleteBtn.closest('.dish-card').dataset.dishId;
+
+        });
         // 菜品管理相关事件
         initDishManagement(navigationManager, loadingMask);
 
@@ -669,8 +666,8 @@
         async loadDishes() {
             try {
                 const response = await fetch('/api/dishes/', {  // 修改请求地址
-                method: 'GET',
-                credentials: 'include'
+                    method: 'GET',
+                    credentials: 'include'
                 });
 
                 if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
@@ -703,6 +700,7 @@
         }
 
         /* --------------- 页面渲染方法 --------------- */
+
         // 渲染菜品列表
         renderDishList(dishes) {
             const dishList = document.querySelector('.dish-list');
@@ -763,23 +761,30 @@
             this.updateURL(targetSection);
         }
 
-        // 处理删除菜品
-        async handleDeleteDish(dish, element) {
-            if (!confirm(`确认删除 ${dish.name}？`)) return;
+        // 在NavigationManager类中修改删除方法
+        async handleDeleteDish(dishId) {
+            if (!confirm(`确认下架该菜品？`)) return;
 
             try {
-                const response = await fetch(`/api/dishes/${dish.id}/`, {
+                const response = await fetch(`/api/dishes/${dishId}/`, { // 确保使用模板字符串
                     method: 'DELETE',
                     credentials: 'include'
                 });
 
-                response.ok ? element.remove() : alert('删除失败');
+                if (response.ok) {
+                    const dishCard = document.querySelector(`[data-dish-id="${dishId}"]`);
+                    if (dishCard) dishCard.remove();
+                    this.showToast("下架成功", "success");
+                } else {
+                    this.showError('dishes', '下架失败: ' + (await response.text()));
+                }
             } catch (error) {
-                alert('网络错误，请检查连接');
+                this.showError('dishes', '网络错误: ' + error.message);
             }
         }
 
         /* --------------- 辅助方法 --------------- */
+
         // 切换功能模块
         switchSection(sectionId) {
             // 隐藏所有模块
@@ -802,7 +807,7 @@
         // 更新浏览器URL
         updateURL(sectionId) {
             const newUrl = `${window.location.pathname}?type=${sectionId}`;
-            window.history.pushState({ section: sectionId }, '', newUrl);
+            window.history.pushState({section: sectionId}, '', newUrl);
         }
 
         // 填充店铺设置表单
@@ -888,7 +893,7 @@
             try {
                 const response = await fetch(`/api/dishes/${dishId}/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify(newData)
                 });
@@ -934,7 +939,7 @@
             try {
                 const response = await fetch('/api/dishes/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify({
                         name: nameInput.value.trim(),
@@ -981,7 +986,7 @@
             try {
                 const response = await fetch('/api/merchant/settings/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify(formData)
                 });
@@ -1079,9 +1084,11 @@
             if (e.target === overlay) overlay.style.display = 'none';
         });
     }
-        /* ===================== 搜索功能 ===================== */
+
+    /* ===================== 搜索功能 ===================== */
     let currentSearchKeyword = '';
     let currentCategory = 'all';
+
     // 搜索按钮点击事件
     function handleSearch() {
         currentSearchKeyword = document.getElementById('dish-search').value.trim();
@@ -1089,7 +1096,7 @@
     }
 
     // 实时输入监听（可选）
-    document.getElementById('dish-search').addEventListener('input', function() {
+    document.getElementById('dish-search').addEventListener('input', function () {
         currentSearchKeyword = this.value.trim();
         triggerSearch();
     });
@@ -1124,7 +1131,7 @@
             document.getElementById('dish-error').textContent = '搜索失败，请稍后重试';
         }
     }
-    </script>
+</script>
 
 </body>
 </html>
