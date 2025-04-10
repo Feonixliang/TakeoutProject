@@ -60,6 +60,7 @@
 
         /* 顶部导航栏 */
         .top-nav {
+            z-index: 1000; /* 确保位于最顶层 */
             background: #1976D2;
             height: 60px;
             display: flex;
@@ -93,8 +94,8 @@
 
         /* 主内容区域 */
         .main-content {
+            margin-top: 60px; /* 保持与顶部导航间距 */
             margin-left: 240px;
-            margin-top: 60px;
             padding: 30px;
             background: #E3F2FD;
             min-height: calc(100vh - 60px);
@@ -148,6 +149,8 @@
             align-items: center;
         }
         .menu-item {
+            position: relative;
+            z-index: 1;
             display: flex;
             justify-content: space-between;
             padding: 15px;
@@ -308,22 +311,30 @@
         }
 
         .merchant-header {
+            position: sticky;
+            top: 60px; /* 固定在顶部导航下方 */
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
         }
 
         .menu-container {
             display: grid;
             grid-template-columns: 120px 1fr;
             gap: 20px;
+            position: relative;
+            margin-top: 20px; /* 新增间距 */
         }
 
         .menu-categories {
             position: sticky;
-            top: 80px;
-            height: calc(100vh - 200px);
+            top: 180px; /* 60px顶部导航 + 60px商家标题 + 60px余量 */
+            height: calc(100vh - 240px); /* 动态计算高度 */
+            align-self: start; /* 防止高度拉伸 */
+            z-index: 900; /* 低于顶部导航 */
         }
 
         .category-list {
@@ -416,24 +427,11 @@
             padding: 0;
         }
 
-        .category-header {
-            transition: all 0.3s ease;
-            padding: 15px 0;
-            margin-top: 20px;
-            border-bottom: 2px solid #eee;
-        }
 
-        .category-header.hidden {
-            opacity: 0;
-            max-height: 0;
-            padding: 0;
-            margin: 0;
-            border: none;
-        }
     </style>
 </head>
 <body>
-    <div class="menu-toggle">☰</div>
+    <div class="menu-toggle"></div>
     <div class="container">
         <nav class="sidebar">
             <div class="logo">美食广场</div>
