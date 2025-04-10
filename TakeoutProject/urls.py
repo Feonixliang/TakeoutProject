@@ -40,10 +40,11 @@ urlpatterns = [
     path('api/merchant/settings/', views.merchant_settings_api),
     path('api/merchants/', views.merchant_list_api, name='merchant_list'),
 
-
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
     path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
     path('api/dishes/', views.dish_api, name='dish_api'),
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
+    path('api/dishes/search/', views.search_dishes, name='search-dishes'),
+
 
 ]

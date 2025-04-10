@@ -154,7 +154,7 @@ class Merchant(models.Model):
 
 class Merchantdishes(models.Model):
     did = models.OneToOneField(Dishes, models.DO_NOTHING, db_column='DId', primary_key=True)  # Field name made lowercase. The composite primary key (DId, MId) found, that is not supported. The first column is selected.
-    mid = models.ForeignKey(Merchant, models.DO_NOTHING, db_column='MId')  # Field name made lowercase.
+    mid = models.ForeignKey(Merchant, models.DO_NOTHING, db_column='MId', related_name='dishes')  # Field name made lowercase.
 
     class Meta:
         managed = False

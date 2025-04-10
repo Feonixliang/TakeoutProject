@@ -13,6 +13,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
 import json
+from django.db.models import Q
 
 # 登录相关视图
 def Login(request):
@@ -159,23 +160,10 @@ def accept_order(request, order_id):
 
 @login_required
 def customer_system(request):
-    """
-    客户子系统主页
-    显示客户基本信息
-    """
-    try:
-        # 通过反向关联获取客户信息（Account -> Customer）
-        customer = request.user.account.customer
-        context = {
-            'customer_id': customer.cid_id,    # 关联的Account主键
-            'customer_name': customer.cname,
-            'customer_phone': customer.cphone,
-            'customer_address': customer.caddress,
-            'customer_balance': customer.cbalance
-        }
-        return render(request, 'customer.html', context)
-    except AttributeError:
-        raise PermissionDenied("非客户账户")  # 权限校验失败
+    """客户子系统主页（示例模板）"""
+    if not request.user.is_authenticated:
+        return redirect('/login/')
+    return render(request, 'customer.html')
 
 
 @login_required
@@ -471,6 +459,43 @@ def dish_api(request, dish_id=None):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+# 修改views.py中的search_dishes视图
+# views.py 修改搜索视图
+@csrf_exempt
+@login_required
+@require_http_methods(["GET"])
+def search_dishes(request):
+    try:
+        merchant = request.user.account.merchant
+        keyword = request.GET.get('keyword', '')
+        category = request.GET.get('category', 'all')
+
+        # 构建基础查询
+        query = Q(merchantdishes__mid=merchant)
+
+        # 关键词过滤
+        if keyword:
+            query &= Q(dname__icontains=keyword)
+
+        # 分类过滤
+        if category != 'all':
+            query &= Q(dcategory=category)
+
+        # 执行查询
+        dishes = Dishes.objects.filter(query).distinct()
+
+        # 序列化数据
+        data = [{
+            "id": dish.did,
+            "name": dish.dname,
+            "price": float(dish.dprice),
+            "category": dish.dcategory or ""
+        } for dish in dishes]
+
+        return JsonResponse(data, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 @csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])
