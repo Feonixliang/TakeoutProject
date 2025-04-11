@@ -53,6 +53,8 @@ urlpatterns = [
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
     path('api/dishes/search/', views.search_dishes, name='search-dishes'),
 
+    path('api/address/', views.address_api, name='address_api'),
+
     path('api/orders/', views.api_orders, name='order-list'),
 
     path('api/orders/<int:order_id>/status/', views.update_order_status, name='update-order-status'),

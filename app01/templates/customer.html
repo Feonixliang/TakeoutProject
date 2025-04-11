@@ -533,6 +533,38 @@
             transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
         }
+        .address-form {
+            max-width: 600px;
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .current-address-text {
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            margin: 12px 0;
+        }
+
+        #newAddress {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin: 12px 0;
+        }
+
+        .form-group {
+            margin: 20px 0;
+        }
+
+        .message {
+            margin-top: 15px;
+            color: var(--danger-red);
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -656,11 +688,23 @@
 
             <!-- 地址管理 -->
             <section id="address">
-                <h2>地址管理</h2>
-                <div class="address-form">
-                    <!-- 地址表单 -->
+            <h2>地址管理</h2>
+            <div class="address-form">
+                <div class="current-address">
+                    <h3>当前地址：</h3>
+                    <p class="current-address-text">{{ customer.caddress }}</p>
                 </div>
-            </section>
+                <div class="edit-address">
+                    <h3>修改地址：</h3>
+                    <div class="form-group">
+                        <textarea id="newAddress" rows="4"
+                            placeholder="请输入新的配送地址"></textarea>
+                    </div>
+                    <button class="user-btn" id="saveAddress">保存地址</button>
+                    <div class="message"></div>
+                </div>
+            </div>
+        </section>
         </main>
 
         <div class="cart-sidebar" style="display: none;">
@@ -716,6 +760,13 @@
                 document.getElementById('searchBtn').addEventListener('click', () => {
                     this.loadMerchants();
                 });
+                // 地址保存按钮点击事件
+                document.getElementById('saveAddress').addEventListener('click', () => {
+                    this.saveAddress();
+                });
+
+                // 初始化地址显示
+                this.loadCurrentAddress();
             }
 
             handleNavClick(event) {
@@ -876,6 +927,56 @@
                 catch (error) {
                     console.error('加载商家详情失败:', error);
                     alert('加载商家信息失败，请稍后重试');
+                }
+            }
+
+            async loadCurrentAddress() {
+                try {
+                    const response = await fetch('/api/address/', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    if (!response.ok) throw new Error('获取地址失败');
+                    const data = await response.json();
+                    document.querySelector('.current-address-text').textContent = data.address;
+                } catch (error) {
+                    console.error('加载地址失败:', error);
+                }
+            }
+
+            async saveAddress() {
+                const newAddress = document.getElementById('newAddress').value.trim();
+                const messageDiv = document.querySelector('#address .message');
+
+                if (!newAddress) {
+                    messageDiv.textContent = '地址不能为空';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/address/', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ address: newAddress })
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.error || '保存失败');
+                    }
+
+                    // 更新显示
+                    document.querySelector('.current-address-text').textContent = newAddress;
+                    document.getElementById('newAddress').value = '';
+                    messageDiv.textContent = '地址更新成功！';
+                    setTimeout(() => messageDiv.textContent = '', 2000);
+
+                } catch (error) {
+                    console.error('保存地址失败:', error);
+                    messageDiv.textContent = error.message;
                 }
             }
 

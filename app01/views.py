@@ -654,7 +654,7 @@ def merchant_list_api(request):
         for merchant in merchants:
             avg_price = merchant.avg_price if merchant.avg_price is not None else 0
             # 打印调试信息
-            print(f"商家：{merchant.mname}，平均价格：{avg_price}")
+            #print(f"商家：{merchant.mname}，平均价格：{avg_price}")
             data.append({
                 "id": merchant.mid_id,
                 "name": merchant.mname,
@@ -664,7 +664,7 @@ def merchant_list_api(request):
             })
 
         # 打印最终数据
-        print("API返回数据：", data)
+        #print("API返回数据：", data)
         return JsonResponse(data, safe=False)
 
     except Exception as e:
@@ -920,3 +920,33 @@ def update_order_status(request, order_id):
 
     except Order.DoesNotExist:
         return JsonResponse({'error': '订单不存在'}, status=404)
+
+
+@login_required
+@require_http_methods(["GET", "PUT"])
+def address_api(request):
+    """地址管理API"""
+    try:
+        customer = request.user.account.customer
+
+        if request.method == 'GET':
+            return JsonResponse({
+                'address': customer.caddress
+            })
+
+        if request.method == 'PUT':
+            data = json.loads(request.body)
+            new_address = data.get('address', '').strip()
+
+            if not new_address:
+                return JsonResponse({'error': '地址不能为空'}, status=400)
+
+            if len(new_address) > 200:
+                return JsonResponse({'error': '地址过长（最多200字符）'}, status=400)
+
+            customer.caddress = new_address
+            customer.save()
+            return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
