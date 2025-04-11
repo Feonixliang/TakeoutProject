@@ -649,14 +649,24 @@ def merchant_list_api(request):
         elif sort_type == 'price_desc':
             merchants = merchants.order_by('-avg_price')
 
-        data = [{
-            "id": merchant.mid_id,
-            "name": merchant.mname,
-            "address": merchant.maddress,
-            "phone": merchant.mphone,
-            "avg_price": merchant.avg_price or 0
-        } for merchant in merchants]
+        # 构造响应数据并转换价格为浮点数
+        data = []
+        for merchant in merchants:
+            avg_price = merchant.avg_price if merchant.avg_price is not None else 0
+            # 打印调试信息
+            print(f"商家：{merchant.mname}，平均价格：{avg_price}")
+            data.append({
+                "id": merchant.mid_id,
+                "name": merchant.mname,
+                "address": merchant.maddress,
+                "phone": merchant.mphone,
+                "avg_price": float(avg_price)
+            })
+
+        # 打印最终数据
+        print("API返回数据：", data)
         return JsonResponse(data, safe=False)
+
     except Exception as e:
         print(f"查询商家出错: {str(e)}")
         return JsonResponse({"error": "服务器错误"}, status=500)
