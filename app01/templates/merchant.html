@@ -7,7 +7,7 @@
     <style>
     /* ========== 携程风格配色方案 ========== */
     :root {
-        --ctrip-blue: #1A2F6B;         /* 携程品牌蓝 */
+        --ctrip-blue: #10478a;         /* 携程品牌蓝 */
         --ctrip-orange: #4A90E2;
         {#FF6A00  携程品牌橙#}
         --ctrip-light-blue: #4A90E2;   /* 辅助蓝色 */
@@ -399,6 +399,38 @@
       visibility: hidden;
     }
 
+    .password-form {
+        background: var(--text-light);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-top: 24px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .password-form h3 {
+        color: var(--ctrip-blue);
+        margin-bottom: 16px;
+        font-size: 18px;
+    }
+
+    #change-password-form .form-group {
+        margin-bottom: 16px;
+    }
+
+    #change-password-form input[type="password"] {
+        width: 100%;
+        padding: 10px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
+    }
+
+    #change-password-form input:focus {
+        border-color: var(--ctrip-orange);
+        box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15);
+    }
+
+
     /* ========== 响应式设计 ========== */
     @media (max-width: 768px) {
         .sidebar {
@@ -620,31 +652,11 @@
             color: #4A5568;
             font-size: 14px;
         }
-
-
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .order-body {
-                grid-template-columns: 1fr;
-            }
-
-            .dish-item {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-
-            .order-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-        }
     }
 </style>
 </head>
 <body>
-    <!-- 移动端菜单开关（与骑手端相同结构） -->
-    <button class="menu-toggle" aria-label="切换菜单">☰</button>
+    <div class="menu-toggle"></div>
     <div class="container">
         <!-- 左侧导航栏（保持与骑手端相同DOM结构） -->
         <nav class="sidebar" aria-label="主菜单">
@@ -823,7 +835,28 @@
                         <div class="form-actions">
                             <button type="submit" class="user-btn">保存设置</button>
                         </div>
-                        <div class="error-msg" id="settings-error"></div>
+                    </form>
+                </div>
+
+                <div class="password-form" style="margin-top: 32px; border-top: 1px solid #eee; padding-top: 24px;">
+                    <h3>修改密码</h3>
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label>旧密码</label>
+                            <input type="password" id="old-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>新密码</label>
+                            <input type="password" id="new-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>确认新密码</label>
+                            <input type="password" id="confirm-password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="user-btn">修改密码</button>
+                        </div>
+                        <div class="error-msg" id="password-error" style="display: none"></div>
                     </form>
                 </div>
             </section>
@@ -891,6 +924,8 @@
             const dishId = deleteBtn.closest('.dish-card').dataset.dishId;
 
         });
+
+
         // 菜品管理相关事件
         initDishManagement(navigationManager, loadingMask);
 
@@ -1535,6 +1570,52 @@
             document.getElementById('dish-error').textContent = '搜索失败，请稍后重试';
         }
     }
+
+
+    // 在<script>标签内添加
+    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const errorDiv = document.getElementById('password-error');
+        errorDiv.style.display = 'none';
+
+        const oldPassword = document.getElementById('old-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // 前端验证
+        if (newPassword !== confirmPassword) {
+            errorDiv.textContent = '新密码两次输入不一致';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/merchant/change-password/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({
+                    old_password: oldPassword,
+                    new_password: newPassword
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('密码修改成功，请重新登录');
+                window.location.href = '/logout/';
+            } else {
+                errorDiv.textContent = data.error || '密码修改失败';
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            errorDiv.textContent = '网络错误，请稍后重试';
+            errorDiv.style.display = 'block';
+        }
+    });
+
 </script>
 
 </body>
