@@ -16,6 +16,7 @@ import json
 from django.db.models import Q, Avg
 
 
+
 # 登录相关视图
 def Login(request):
     """
@@ -29,7 +30,6 @@ def Login(request):
         return HttpResponse(result)  # 返回验证结果
     else:
         return render(request, 'logintest.html')
-
 
 
 def verify(request):
@@ -56,6 +56,7 @@ def verify(request):
         else:
             return HttpResponse('0')  # 0表示认证失败
 
+
 # 系统门户路由
 def system_portal(request):
     """
@@ -72,6 +73,7 @@ def system_portal(request):
     except AttributeError:
         return HttpResponse('账户类型错误')
 
+
 # 各类型用户子系统视图
 @login_required  # 必须登录才能访问
 def rider_system(request):
@@ -83,7 +85,7 @@ def rider_system(request):
         # 通过反向关联获取骑手信息（Account -> Rider）
         rider = request.user.account.rider
         context = {
-            'rider_id': rider.rid_id,    # 关联的Account主键
+            'rider_id': rider.rid_id,  # 关联的Account主键
             'rider_name': rider.rname,
             'rider_phone': rider.rphone
         }
@@ -119,36 +121,90 @@ def rider_profile_api(request):
 @login_required
 def api_orders(request):
     try:
-        rider = request.user.account.rider
-        order_type = request.GET.get('type', 'pending')
+        order_type = request.GET.get("type", "pending")
+        if order_type not in ["pending", "active", "history"]:
+            return JsonResponse({"error": "无效的订单类型"}, status=400, ensure_ascii=False)
 
-        # 根据类型过滤订单
-        if order_type == 'pending':
-            orders = Order.objects.filter(status='pending', rid=None)
-        elif order_type == 'active':
-            orders = Order.objects.filter(status='active', rid=rider)
-        elif order_type == 'history':
-            orders = Order.objects.filter(rid=rider).exclude(status__in=['pending', 'active'])
+        # 基础查询集
+        orders = Order.objects.select_related(
+            'cid',  # 客户信息
+            'mid'  # 商家信息
+        ).prefetch_related(
+            'orderdishes_set__did'  # 预载订单菜品
+        )
 
-        # 序列化订单数据
-        data = [{
-            'id': order.oid,
-            'merchant_address': order.merchant_address,
-            'customer_address': order.customer_address,
-            'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')
-        } for order in orders]
+        # 根据类型过滤
+        if order_type == "pending":
+            orders = orders.filter(status="pending", rid__isnull=True)
+        elif order_type == "active":
+            rider = request.user.account.rider
+            orders = orders.filter(status="active", rid=rider)
+        elif order_type == "history":
+            rider = request.user.account.rider
+            orders = orders.filter(rid=rider).exclude(status__in=["pending", "active"])
 
-        return JsonResponse(data, safe=False)
+        data = []
+        for order in orders:
+            # 商家信息（mid是必填字段）
+            merchant_info = {
+                "maddress": order.mid.maddress,
+                "mname": order.mid.mname
+            } if order.mid else {
+                "maddress": "未知商家",
+                "mname": "未知商家"
+            }
+
+            # 客户信息（cid有默认值-1需要处理）
+            try:
+                customer_info = {
+                    "cname": order.cid.cname,
+                    "cphone": order.cid.cphone,
+                    "caddress": order.cid.caddress
+                } if order.cid else {
+                    "cname": "未知客户",
+                    "cphone": "",
+                    "caddress": ""
+                }
+            except Customer.DoesNotExist:
+                customer_info = {
+                    "cname": "无效客户",
+                    "cphone": "",
+                    "caddress": ""
+                }
+
+            # 订单菜品详情
+            items = []
+            for order_dish in order.orderdishes_set.all():
+                dish = order_dish.did
+                items.append({
+                    "name": dish.dname,
+                    "quantity": order_dish.quantity,
+                    "unit_price": float(dish.dprice),
+                    "subtotal": float(dish.dprice * order_dish.quantity)
+                })
+
+            # 构造订单数据
+            order_data = {
+                "id": order.oid,
+                "merchant": merchant_info,
+                "customer": customer_info,
+                "items": items,
+                "total_price": float(order.totalprice),
+                "status": order.get_status_display()  # 显示中文状态
+            }
+            data.append(order_data)
+
+        return JsonResponse(data, safe=False, ensure_ascii=False)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'error': str(e)}, status=400, ensure_ascii=False)
 
-# views.py
+
 @login_required
 def accept_order(request, order_id):
     try:
         order = Order.objects.get(oid=order_id)
-        #筛选未接取 & 骑手未接订单
+        # 筛选未接取 & 骑手未接订单
         if order.status == 'pending' and not order.rid:
             order.rid = request.user.account.rider
             order.status = 'active'
@@ -183,7 +239,7 @@ def merchant_system(request):
         # 通过反向关联获取商家信息（Account -> Rider）
         merchant = request.user.account.merchant
         context = {
-            'merchant_id': merchant.mid_id,    # 关联的Account主键
+            'merchant_id': merchant.mid_id,  # 关联的Account主键
             'merchant_name': merchant.mname,
             'merchant_phone': merchant.mphone,
             'merchant_address': merchant.maddress,
@@ -225,7 +281,8 @@ def change_password_api(request):
 # 注册相关视图
 def register(request):
     """注册入口页面"""
-    return render(request,'takeoutRegistrationPortal.html')
+    return render(request, 'takeoutRegistrationPortal.html')
+
 
 def rider_register(request):
     """
@@ -283,6 +340,7 @@ def rider_register(request):
             return HttpResponse(f'注册失败: {str(e)}', status=400)
 
     return render(request, 'riderRegistration.html')
+
 
 def customer_register(request):
     """
@@ -344,18 +402,18 @@ def customer_register(request):
 
     return render(request, 'customerRegistration.html')
 
+
 def merchant_register(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             # 获取注册参数
-            name = data.get('name')#username是Django的账户
+            name = data.get('name')  # username是Django的账户
             username = data.get('username')
             password = data.get('password')
             phone = data.get('phone')
             address = data.get('address')
             balance = 0.0
-
 
             # 参数校验
             if not all([name, username, password, phone, address]):
@@ -399,6 +457,7 @@ def merchant_register(request):
 
     return render(request, 'merchantRegistration.html')
 
+
 def user_logout(request):
     """用户登出功能"""
     logout(request)  # 清除用户会话
@@ -418,18 +477,18 @@ def dish_api(request, dish_id=None):
 
         # 如果请求方法是 GET，则获取当前商家的所有菜品信息。
         if request.method == 'GET':
-            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)# 查询数据库中属于当前商家的所有菜品。
+            dishes = Dishes.objects.filter(merchantdishes__mid=merchant)  # 查询数据库中属于当前商家的所有菜品。
             data = [{
-                "id": dish.did,                 # 菜品ID
-                "name": dish.dname,             # 菜品名称
-                "price": float(dish.dprice),    # 转换菜品价格为浮点数格式
-                "category": dish.dcategory      # 菜品类别
-            } for dish in dishes]               # 遍历查询到的每个菜品对象，并构建字典。
+                "id": dish.did,  # 菜品ID
+                "name": dish.dname,  # 菜品名称
+                "price": float(dish.dprice),  # 转换菜品价格为浮点数格式
+                "category": dish.dcategory  # 菜品类别
+            } for dish in dishes]  # 遍历查询到的每个菜品对象，并构建字典。
 
             print(data)
             return JsonResponse(data, safe=False)
 
-        #修改菜品
+        # 修改菜品
         if request.method == 'POST' and dish_id:  # 修改逻辑
             # 验证菜品归属
             dish = Dishes.objects.get(did=dish_id)
@@ -461,9 +520,9 @@ def dish_api(request, dish_id=None):
 
         # 如果请求方法是 POST，则创建一个新的菜品并将其关联到当前商家。
         if request.method == 'POST' and not dish_id:
-            data = json.loads(request.body)# 解析请求体中的 JSON 数据。
+            data = json.loads(request.body)  # 解析请求体中的 JSON 数据。
 
-            dish = Dishes.objects.create(# 在数据库中创建新的菜品记录。
+            dish = Dishes.objects.create(  # 在数据库中创建新的菜品记录。
                 dname=data['name'],
                 dprice=data['price'],
                 dcategory=data.get('category', '')
@@ -472,7 +531,7 @@ def dish_api(request, dish_id=None):
             # 创建 Merchantdishes 记录来关联新菜品和商家。
             Merchantdishes.objects.create(did=dish, mid=merchant)
 
-            return JsonResponse({# 向客户端返回包含新创建菜品信息的 JSON 响应
+            return JsonResponse({  # 向客户端返回包含新创建菜品信息的 JSON 响应
                 "id": dish.did,
                 "name": dish.dname,
                 "price": float(dish.dprice),
@@ -482,9 +541,9 @@ def dish_api(request, dish_id=None):
         # 如果请求方法是 DELETE，则删除指定 ID 的菜品。
         if request.method == 'DELETE':
             try:
-                dish = Dishes.objects.get(did=dish_id)                          # 从数据库中获取要删除的菜品。
-                Merchantdishes.objects.get(did=dish, mid=merchant).delete()     # 删除该菜品与商家之间的关联。
-                dish.delete()                                                   # 从数据库中彻底移除该菜品。
+                dish = Dishes.objects.get(did=dish_id)  # 从数据库中获取要删除的菜品。
+                Merchantdishes.objects.get(did=dish, mid=merchant).delete()  # 删除该菜品与商家之间的关联。
+                dish.delete()  # 从数据库中彻底移除该菜品。
                 return JsonResponse({"status": "success"})
             except Exception as e:
                 return JsonResponse({"error": str(e)}, status=404)
@@ -530,6 +589,8 @@ def search_dishes(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
 @csrf_exempt
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -541,9 +602,9 @@ def merchant_settings_api(request):
         # GET请求处理：返回当前设置
         if request.method == 'GET':
             return JsonResponse({
-                'name': merchant.mname,         # 商家名称
-                'phone': merchant.mphone,       # 联系电话
-                'address': merchant.maddress    # 店铺地址
+                'name': merchant.mname,  # 商家名称
+                'phone': merchant.mphone,  # 联系电话
+                'address': merchant.maddress  # 店铺地址
             })
 
         # POST请求处理：更新设置
@@ -565,7 +626,8 @@ def merchant_settings_api(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@require_http_methods(["GET","POST"])
+
+@require_http_methods(["GET", "POST"])
 @login_required
 def merchant_list_api(request):
     try:
@@ -684,6 +746,7 @@ def merchant_orders_api(request):
         print(f"Error fetching orders: {str(e)}")
         return JsonResponse({"error": "服务器内部错误"}, status=500)
 
+
 @login_required
 def merchant_detail_api(request, merchant_id):
     """获取商家详情"""
@@ -744,7 +807,6 @@ def create_order(request):
                 if not Merchantdishes.objects.filter(did=dish, mid=merchant).exists():
                     raise PermissionDenied("商家没有该菜品")
 
-
                 Orderdishes.objects.create(
                     oid=order,
                     did=dish,
@@ -778,3 +840,73 @@ def create_order(request):
         return JsonResponse({'error': str(e)}, status=403)
     except Exception as e:
         return JsonResponse({'error': f'服务器错误: {str(e)}'}, status=500)
+
+
+# 在 views.py 中添加以下视图函数
+@login_required
+def order_list_api(request):
+    """骑手订单列表API（解决 /api/orders/ 404 问题）"""
+    try:
+        rider = request.user.account.rider
+        order_type = request.GET.get('type', 'pending')
+
+        # 根据类型过滤订单
+        if order_type == 'pending':
+            orders = Order.objects.filter(status='pending', rid=None)
+        elif order_type == 'active':
+            orders = Order.objects.filter(status='active', rid=rider)
+        elif order_type == 'history':
+            orders = Order.objects.filter(rid=rider).exclude(status__in=['pending', 'active'])
+
+        # 增强订单数据序列化（匹配前端需求）
+        data = []
+        for order in orders:
+            customer = order.cid
+            data.append({
+                'id': order.oid,
+                'status': order.status,
+                'total': float(order.totalprice),
+                'customer': {
+                    'name': customer.cname,
+                    'phone': customer.cphone,
+                    'address': customer.caddress
+                },
+                'items': [{
+                    'name': item.did.dname,
+                    'quantity': item.quantity,
+                    'subtotal': float(item.did.dprice * item.quantity)
+                } for item in order.orderdishes_set.all()],
+                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return JsonResponse(data, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# 新增订单状态更新视图函数
+@login_required
+@login_required
+@login_required
+def update_order_status(request, order_id):
+    """更新订单状态（添加严格权限校验）"""
+    try:
+        order = Order.objects.get(oid=order_id)
+        rider = request.user.account.rider
+
+        # 新增：校验当前骑手是否为订单接单人
+        if order.rid != rider:
+            return JsonResponse({'error': '无权操作此订单'}, status=403)
+
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        if new_status not in ['completed', 'canceled']:
+            return JsonResponse({'error': '无效状态'}, status=400)
+
+        order.status = new_status
+        order.save()
+        return JsonResponse({'status': 'success'})
+
+    except Order.DoesNotExist:
+        return JsonResponse({'error': '订单不存在'}, status=404)

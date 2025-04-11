@@ -21,10 +21,9 @@ from app01 import views
 urlpatterns = [
     #    path('admin/', admin.site.urls),
 
-    #用户访问www.xxxx.com/login    -> 执行函数
-    path('login/', views.Login,name='login'),
+    # 用户访问www.xxxx.com/login    -> 执行函数
+    path('login/', views.Login, name='login'),
     path('logout/', views.user_logout, name='logout'),  # 新增退出路由
-
 
     path('system/', views.system_portal),  # 新增系统入口
     path('system/rider', views.rider_system),
@@ -35,9 +34,9 @@ urlpatterns = [
 
     path('register/choose', views.register),
 
-    path('register/rider', views.rider_register,name='rider_register'),
-    path('register/customer', views.customer_register,name='customer_register'),
-    path('register/merchant', views.merchant_register,name='merchant_register'),
+    path('register/rider', views.rider_register, name='rider_register'),
+    path('register/customer', views.customer_register, name='customer_register'),
+    path('register/merchant', views.merchant_register, name='merchant_register'),
     path('api/merchant/settings/', views.merchant_settings_api),
     path('api/merchants/', views.merchant_list_api, name='merchant_list'),
     path('api/merchant/change-password/', views.change_password_api, name='change-password'),
@@ -54,5 +53,8 @@ urlpatterns = [
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
     path('api/dishes/search/', views.search_dishes, name='search-dishes'),
 
+    path('api/orders/', views.api_orders, name='order-list'),
+
+    path('api/orders/<int:order_id>/status/', views.update_order_status, name='update-order-status'),
 
 ]
