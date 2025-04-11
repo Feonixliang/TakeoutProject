@@ -13,7 +13,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
 import json
-from django.db.models import Q
+from django.db.models import Q, Avg
+
 
 # 登录相关视图
 def Login(request):
@@ -566,25 +567,37 @@ def merchant_settings_api(request):
 
 @require_http_methods(["GET","POST"])
 @login_required
-@login_required
 def merchant_list_api(request):
     try:
-        merchants = Merchant.objects.all()
-        # for merchant in merchants:
-        #     print("id:", merchant.mid_id,  # 注意这里遍历每个merchant对象
-        #           "name:", merchant.mname,
-        #           "address:", merchant.maddress,
-        #           "phone:", merchant.mphone)
+        # 获取查询参数
+        search_name = request.GET.get('name', '')
+        sort_type = request.GET.get('sort', 'default')
+
+        # 基础查询（带有平均价格注释）
+        merchants = Merchant.objects.annotate(
+            avg_price=Avg('dishes__did__dprice')  # 通过中间表关联
+        )
+
+        # 名称过滤
+        if search_name:
+            merchants = merchants.filter(mname__icontains=search_name)
+        # 排序处理
+        if sort_type == 'price_asc':
+            merchants = merchants.order_by('avg_price')
+        elif sort_type == 'price_desc':
+            merchants = merchants.order_by('-avg_price')
+
         data = [{
             "id": merchant.mid_id,
             "name": merchant.mname,
             "address": merchant.maddress,
-            "phone": merchant.mphone
+            "phone": merchant.mphone,
+            "avg_price": merchant.avg_price or 0
         } for merchant in merchants]
         return JsonResponse(data, safe=False)
     except Exception as e:
-        print(f"Error fetching merchants: {str(e)}")  # 添加日志输出
-        return JsonResponse({"error": str(e)}, status=400)
+        print(f"查询商家出错: {str(e)}")
+        return JsonResponse({"error": "服务器错误"}, status=500)
 
 
 # views.py 新增

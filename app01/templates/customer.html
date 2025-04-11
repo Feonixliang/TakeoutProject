@@ -488,7 +488,51 @@
             padding: 0;
         }
 
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            max-width: 600px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+        }
+        #sortSelect {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--text-light);
+            cursor: pointer;
+        }
+        .avg-price {
+            color: var(--text-dark);
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+        .avg-price::before {
+            content: '💰 均价 ';
+        }
 
+        .search-btn {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--ctrip-blue);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .search-btn:hover {
+            background: var(--ctrip-orange);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
     </style>
 </head>
 <body>
@@ -517,20 +561,27 @@
 
             <!-- 首页内容 -->
             <section id="home" class="active">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="搜索商家名称...">
+                    <button id="searchBtn" class="search-btn">搜索</button>
+                    <select id="sortSelect">
+                        <option value="default">默认排序</option>
+                        <option value="price_asc">价格从低到高</option>
+                        <option value="price_desc">价格从高到低</option>
+                    </select>
+                </div>
                 <h2>推荐商家</h2>
                     <div class="merchant-list"></div>
-
-
                     <!-- 商家卡片模板 -->
                     <div class="merchant-card template" style="display: block">
                         <div class="restaurant-info">
                             <h3 class="merchant-name"></h3>
                             <p>📍商家地址：<span class="merchant-address"></span></p>
-                        </div>
-                        <div class="merchant-stats" style="display: none">
-                            <span class="stat-item">⭐4.8</span>
-                            <span class="stat-item">月售1000+</span>
-                            <span class="stat-item">人均¥35</span>
+                            <div class="merchant-stats">
+                                <span class="stat-item">⭐4.8</span>
+                                <span class="stat-item">月售1000+</span>
+                                <div class="avg-price">💰 均价 --</div> <!-- 新增均价显示 -->
+                            </div>
                         </div>
                         <button class="browse-btn">进店逛逛</button>
                     </div>
@@ -650,6 +701,21 @@
                     });
                 });
 
+                // 新增搜索和排序事件监听
+                document.getElementById('searchInput').addEventListener('input', () => {
+                    this.debouncedSearch();
+                });
+
+                document.getElementById('sortSelect').addEventListener('change', () => {
+                    this.loadMerchants();
+                });
+
+                document.getElementById('searchInput').addEventListener('input', () => {
+                    this.debouncedSearch();
+                });
+                document.getElementById('searchBtn').addEventListener('click', () => {
+                    this.loadMerchants();
+                });
             }
 
             handleNavClick(event) {
@@ -698,17 +764,21 @@
             createMerchantCard(merchant, template) {
                 const clone = template.cloneNode(true);
                 clone.classList.remove('template');
-                clone.style.display = 'block';  // 修改显示方式
-
+                clone.style.display = 'block';
                 // 填充数据
                 clone.querySelector('.merchant-name').textContent = merchant.name;
                 clone.querySelector('.merchant-address').textContent = merchant.address;
 
-                // 修改点击事件
+                // 显示平均价格
+                const avgPrice = clone.querySelector('.avg-price');
+                if (avgPrice) {
+                    avgPrice.textContent = (typeof merchant.avg_price === 'number' && !isNaN(merchant.avg_price))
+                        ? merchant.avg_price.toFixed(2)
+                        : '--';
+                }
                 clone.querySelector('.browse-btn').addEventListener('click', () => {
                     this.showMerchantDetail(merchant.id);
                 });
-
                 return clone;
             }
 
@@ -727,19 +797,22 @@
 
             async loadMerchants() {
                 try {
-                    const response = await fetch('/api/merchants/', {  // 修改API地址
+                    // 获取搜索参数
+                    const searchName = document.getElementById('searchInput').value;
+                    const sortType = document.getElementById('sortSelect').value;
+
+                    const url = new URL('/api/merchants/', window.location.origin);
+                    url.searchParams.set('name', searchName);
+                    url.searchParams.set('sort', sortType);
+                    const response = await fetch(url, {
                         method: 'GET',
                         credentials: 'include'
                     });
-
-
                     if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
                     const merchants = await response.json();
-                    console.log('API响应数据:', merchants); // 添加调试日志
                     this.renderMerchantsList(merchants);
                 } catch (error) {
                     console.error('加载商家失败:', error);
-                    // 可以添加用户提示
                     const merchantList = document.querySelector('#home .merchant-list');
                     merchantList.innerHTML = '<div class="error-msg">加载商家失败，请稍后重试</div>';
                 }
@@ -1180,6 +1253,14 @@
         // 初始化导航系统
         document.addEventListener('DOMContentLoaded', () => {
             new Navigation();
+        });
+
+        // customer.html
+        document.addEventListener('DOMContentLoaded', () => {
+            window.navigation = new Navigation();
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                window.navigation.loadMerchants();
+            });
         });
     </script>
 </body>
