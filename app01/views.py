@@ -121,34 +121,83 @@ def rider_profile_api(request):
 def api_orders(request):
     try:
         order_type = request.GET.get("type", "pending")
-        # 校验 type 参数合法性
         if order_type not in ["pending", "active", "history"]:
-            return JsonResponse({"error": "无效的订单类型"}, status=400)
+            return JsonResponse({"error": "无效的订单类型"}, status=400, ensure_ascii=False)
 
-        # 过滤逻辑
+        # 基础查询集
+        orders = Order.objects.select_related(
+            'cid',  # 客户信息
+            'mid'  # 商家信息
+        ).prefetch_related(
+            'orderdishes_set__did'  # 预载订单菜品
+        )
+
+        # 根据类型过滤
         if order_type == "pending":
-            orders = Order.objects.filter(status="pending", rid__isnull=True)
+            orders = orders.filter(status="pending", rid__isnull=True)
         elif order_type == "active":
             rider = request.user.account.rider
-            orders = Order.objects.filter(status="active", rid=rider)
+            orders = orders.filter(status="active", rid=rider)
         elif order_type == "history":
             rider = request.user.account.rider
-            orders = Order.objects.filter(rid=rider).exclude(status__in=["pending", "active"])
-        # 修正：通过外键获取商家和客户地址
+            orders = orders.filter(rid=rider).exclude(status__in=["pending", "active"])
+
         data = []
         for order in orders:
-            customer_name = order.cid.cname if order.cid else "未知客户"
-            merchant_address = order.mid.maddress if order.mid else "未知地址"
-            data.append({
-                'id': order.oid,
-                'merchant_address': order.mid.maddress,  # 外键访问商家地址
-                'customer_address': order.cid.caddress,  # 外键访问客户地址
-                'status': order.status
-            })
-        return JsonResponse(data, safe=False)  # 确保返回数组
+            # 商家信息（mid是必填字段）
+            merchant_info = {
+                "maddress": order.mid.maddress,
+                "mname": order.mid.mname
+            } if order.mid else {
+                "maddress": "未知商家",
+                "mname": "未知商家"
+            }
+
+            # 客户信息（cid有默认值-1需要处理）
+            try:
+                customer_info = {
+                    "cname": order.cid.cname,
+                    "cphone": order.cid.cphone,
+                    "caddress": order.cid.caddress
+                } if order.cid else {
+                    "cname": "未知客户",
+                    "cphone": "",
+                    "caddress": ""
+                }
+            except Customer.DoesNotExist:
+                customer_info = {
+                    "cname": "无效客户",
+                    "cphone": "",
+                    "caddress": ""
+                }
+
+            # 订单菜品详情
+            items = []
+            for order_dish in order.orderdishes_set.all():
+                dish = order_dish.did
+                items.append({
+                    "name": dish.dname,
+                    "quantity": order_dish.quantity,
+                    "unit_price": float(dish.dprice),
+                    "subtotal": float(dish.dprice * order_dish.quantity)
+                })
+
+            # 构造订单数据
+            order_data = {
+                "id": order.oid,
+                "merchant": merchant_info,
+                "customer": customer_info,
+                "items": items,
+                "total_price": float(order.totalprice),
+                "status": order.get_status_display()  # 显示中文状态
+            }
+            data.append(order_data)
+
+        return JsonResponse(data, safe=False, ensure_ascii=False)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'error': str(e)}, status=400, ensure_ascii=False)
+
 
 @login_required
 def accept_order(request, order_id):
@@ -786,6 +835,7 @@ def order_list_api(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
 
 # 新增订单状态更新视图函数
 @login_required
