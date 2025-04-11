@@ -8,25 +8,25 @@
     <style>
         /* 基础变量定义 */
         :root {
-            --sidebar-width: 240px;         /* 侧边栏宽度 */
-            --primary-color: #1A237E;       /* 主色调（深蓝） */
-            --secondary-color: #1976D2;     /* 次色调（亮蓝） */
-            --hover-color: #303F9F;         /* 悬停颜色 */
-            --text-light: #E8EAF6;          /* 浅色文字 */
+            --sidebar-width: 240px; /* 侧边栏宽度 */
+            --primary-color: #1A237E; /* 主色调（深蓝） */
+            --secondary-color: #1976D2; /* 次色调（亮蓝） */
+            --hover-color: #303F9F; /* 悬停颜色 */
+            --text-light: #E8EAF6; /* 浅色文字 */
         }
 
         /* 全局基础样式 */
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;         /* 盒模型计算方式 */
+            box-sizing: border-box; /* 盒模型计算方式 */
             font-family: '微软雅黑', sans-serif; /* 中文字体设置 */
         }
 
         /* 主容器布局 */
         .container {
             display: flex;
-            min-height: 100vh;             /* 最小高度占满视口 */
+            min-height: 100vh; /* 最小高度占满视口 */
             position: relative;
         }
 
@@ -34,10 +34,10 @@
         .sidebar {
             width: var(--sidebar-width);
             background: var(--primary-color);
-            position: fixed;               /* 固定定位 */
+            position: fixed; /* 固定定位 */
             height: 100%;
             transition: transform 0.3s ease; /* 侧边栏动画效果 */
-            z-index: 1000;                 /* 确保在最上层 */
+            z-index: 1000; /* 确保在最上层 */
         }
 
         /* 侧边栏LOGO */
@@ -46,21 +46,21 @@
             font-size: 24px;
             padding: 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1); /* 底部细线分隔 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 底部细线分隔 */
         }
 
         /* 导航菜单样式 */
         .nav-menu {
-            list-style: none;              /* 移除列表符号 */
+            list-style: none; /* 移除列表符号 */
             padding: 20px;
         }
 
         /* 导航链接基础样式 */
         .nav-link {
             color: var(--text-light);
-            text-decoration: none;         /* 移除下划线 */
+            text-decoration: none; /* 移除下划线 */
             padding: 12px;
-            display: block;                /* 块级元素 */
+            display: block; /* 块级元素 */
             border-radius: 6px;
             transition: background 0.3s ease; /* 悬停动画 */
         }
@@ -77,17 +77,17 @@
             height: 60px;
             display: flex;
             align-items: center;
-            justify-content: flex-end;      /* 内容靠右对齐 */
+            justify-content: flex-end; /* 内容靠右对齐 */
             padding: 0 30px;
-            position: fixed;                /* 固定定位 */
+            position: fixed; /* 固定定位 */
             width: calc(100% - var(--sidebar-width)); /* 动态宽度计算 */
-            left: var(--sidebar-width);     /* 与侧边栏右侧对齐 */
+            left: var(--sidebar-width); /* 与侧边栏右侧对齐 */
         }
 
         /* 主内容区域 */
         .main-content {
             margin-left: var(--sidebar-width); /* 留出侧边栏空间 */
-            padding: 90px 30px 30px;        /* 上边距避开顶部导航 */
+            padding: 90px 30px 30px; /* 上边距避开顶部导航 */
         }
 
         /* 响应式设计 - 移动端适配 */
@@ -95,18 +95,22 @@
             .sidebar {
                 transform: translateX(-100%); /* 默认隐藏侧边栏 */
             }
+
             .sidebar.active {
-                transform: translateX(0);   /* 显示侧边栏 */
+                transform: translateX(0); /* 显示侧边栏 */
             }
+
             .top-nav {
-                width: 100%;                /* 移动端占满宽度 */
+                width: 100%; /* 移动端占满宽度 */
                 left: 0;
             }
+
             .main-content {
-                margin-left: 0;             /* 取消侧边栏占位 */
+                margin-left: 0; /* 取消侧边栏占位 */
             }
+
             .menu-toggle {
-                display: block;             /* 显示菜单开关按钮 */
+                display: block; /* 显示菜单开关按钮 */
             }
         }
 
@@ -115,14 +119,14 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 添加阴影 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影 */
             margin-bottom: 20px;
         }
 
         /* 地图容器占位 */
         .map-container {
             height: 300px;
-            background: #f0f0f0;           /* 灰色背景占位 */
+            background: #f0f0f0; /* 灰色背景占位 */
             border-radius: 8px;
             margin: 15px 0;
         }
@@ -132,7 +136,7 @@
             color: white;
             padding: 8px 16px;
             border-radius: 4px;
-            background: transparent;       /* 透明背景 */
+            background: transparent; /* 透明背景 */
             border: none;
             cursor: pointer;
             transition: background 0.3s ease;
@@ -147,286 +151,442 @@
             cursor: pointer;
             font-size: 24px;
             color: #fff;
-            background: rgba(0,0,0,0.5);   /* 半透明黑色背景 */
+            background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
             padding: 8px 12px;
             border-radius: 4px;
-            display: none;                  /* 默认隐藏 */
+            display: none; /* 默认隐藏 */
         }
 
         /* 激活状态的菜单项 */
         .nav-link.active {
             background: var(--hover-color);
             font-weight: bold;
+
+            /* 订单卡片增强样式 */
+
+            .rider-order-card {
+                background: white;
+                border-radius: 8px;
+                padding: 24px;
+                margin: 16px 0;
+                box-shadow: 0 2px 8px rgba(28, 36, 56, 0.08);
+                border-left: 4px solid transparent;
+            }
+
+            .order-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #F0F2F5;
+                padding-bottom: 16px;
+                margin-bottom: 20px;
+            }
+
+            .order-id {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1A2F6B;
+            }
+
+            .order-body {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+
+            .dishes-items {
+                background: #F8FAFC;
+                border-radius: 8px;
+                padding: 12px;
+            }
+
+            .dish-item {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 12px;
+                padding: 12px 0;
+                border-bottom: 1px solid #EDF2F7;
+            }
+
+            .order-total {
+                text-align: right;
+                font-weight: 600;
+                margin-top: 12px;
+                color: #1A2F6B;
+            }
+
+            /* 状态指示器 */
+
+            .status-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 8px;
+            }
+
+            /* 不同状态颜色 */
+
+            [data-status="pending"] {
+                border-left-color: #FFB020;
+            }
+
+            [data-status="active"] {
+                border-left-color: #4091F7;
+            }
+
+            [data-status="completed"] {
+                border-left-color: #14C9A2;
+            }
+
+            .status-text {
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 13px;
+            }
+
+            [data-status="pending"] .status-text {
+                background: #FFF4E5;
+                color: #FFB020;
+            }
+
+            [data-status="active"] .status-text {
+                background: #E8F2FF;
+                color: #4091F7;
+            }
+
+            [data-status="completed"] .status-text {
+                background: #E6F9F5;
+                color: #14C9A2;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 移动端菜单开关 -->
-    <button class="menu-toggle" aria-label="切换菜单">☰</button>
+<!-- 移动端菜单开关 -->
+<button class="menu-toggle" aria-label="切换菜单">☰</button>
 
-    <div class="container">
-        <!-- 左侧导航栏 -->
-        <nav class="sidebar" aria-label="主菜单">
-            <div class="logo">骑手中心</div>
-            <ul class="nav-menu">
-                <!-- 数据属性 data-type 用于JavaScript识别 -->
-                <li><a href="#" class="nav-link" data-type="pending">待接订单</a></li>
-                <li><a href="#" class="nav-link" data-type="active">进行中订单</a></li>
-                <li><a href="#" class="nav-link" data-type="history">历史记录</a></li>
-            </ul>
+<div class="container">
+    <!-- 左侧导航栏 -->
+    <nav class="sidebar" aria-label="主菜单">
+        <div class="logo">骑手中心</div>
+        <ul class="nav-menu">
+            <!-- 数据属性 data-type 用于JavaScript识别 -->
+            <li><a href="#" class="nav-link" data-type="pending">待接订单</a></li>
+            <li><a href="#" class="nav-link" data-type="active">进行中订单</a></li>
+            <li><a href="#" class="nav-link" data-type="history">历史记录</a></li>
+        </ul>
+    </nav>
+
+    <!-- 移动端遮罩层 -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- 顶部导航 -->
+    <header class="top-nav">
+        <nav class="user-menu">
+            <span class="user-btn">你好骑手 <span id="rider-name">{{ rider_name }}</span></span>
+            <a href="/logout/" class="user-btn">退出</a>
         </nav>
+    </header>
 
-        <!-- 移动端遮罩层 -->
-        <div class="sidebar-overlay"></div>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 待接订单区域 -->
+        <section id="pending-orders" style="display: none;">
+            <h2>待接订单（<span id="pending-count">0</span>）</h2>
+            <div class="order-list" id="pending-orders-list"></div>
+        </section>
 
-        <!-- 顶部导航 -->
-        <header class="top-nav">
-            <nav class="user-menu">
-                <span class="user-btn">你好骑手 {{ rider_name }}</span>
-                <a href="/logout/" class="user-btn">退出</a>
-            </nav>
-        </header>
+        <!-- 进行中订单区域 -->
+        <section id="active-orders" style="display: none;">
+            <h2>进行中订单（<span id="active-count">0</span>）</h2>
+            <div class="order-list" id="active-orders-list"></div>
+        </section>
 
-        <!-- 主内容区域 -->
-        <main class="main-content">
-            <!-- 待接订单区域 -->
-            <section id="pending-orders" style="display: none;">
-                <h2>待接订单（<span id="pending-count">0</span>）</h2>
-                <div class="order-list" id="pending-orders-list">
-                    <!-- 订单模板（隐藏状态） -->
-                    <div class="order-card template" style="display:none;">
-                        <!-- 模板内容 -->
-                        <div class="order-status">
-                            <span class="status-indicator status-pending"></span>
-                            <span class="status-text">待接单</span>
-                        </div>
-                        <h3 class="order-id">订单号：<span class="value"></span></h3>
-                        <p>商家地址：<span class="merchant-address value"></span></p>
-                        <p>客户地址：<span class="customer-address value"></span></p>
-                        <p>下单时间：<span class="order-time value"></span></p>
-                        <div class="action-buttons">
-                            <button class="accept-btn user-btn">接单</button>
-                            <button class="detail-btn user-btn">详情</button>
-                        </div>
+        <!-- 历史订单区域 -->
+        <section id="history-orders" style="display: none;">
+            <h2>历史订单（<span id="history-count">0</span>）</h2>
+            <div class="order-list" id="history-orders-list"></div>
+        </section>
+
+        <!-- 全局模板容器（隐藏但存在于DOM中） -->
+        <div style="display: none;">
+            <!-- 待接订单模板 -->
+            <div class="rider-order-card template" id="pending-template">
+                <div class="order-header">
+                    <span class="order-id">订单号：<span class="value"></span></span>
+                    <span class="status-text">
+                    <span class="status-dot"></span>
+                    <span class="status-label"></span>
+                </span>
+                </div>
+                <div class="order-body">
+                    <div class="customer-info">
+                        <h4>客户信息</h4>
+                        <p>地址：<span class="customer-address"></span></p>
+                    </div>
+                    <div class="dishes-list">
+                        <h4>菜品详情</h4>
+                        <div class="dishes-items"></div>
+                        <div class="order-total">总价：¥<span class="total-price">0.00</span></div>
                     </div>
                 </div>
-            </section>
-
-            <!-- 进行中订单区域 -->
-            <section id="active-orders" style="display: none;">
-                <h2>进行中订单（<span id="active-count">0</span>）</h2>
-                <div class="order-list" id="active-orders-list">
-                    <!-- 模板内容 -->
-                    <div class="order-card template" style="display:none;">
-                        <!-- 模板内容 -->
-                        <div class="order-status">
-                            <span class="status-indicator status-pending"></span>
-                            <span class="status-text">待接单</span>
-                        </div>
-                        <h3 class="order-id">订单号：<span class="value"></span></h3>
-                        <p>商家地址：<span class="merchant-address value"></span></p>
-                        <p>客户地址：<span class="customer-address value"></span></p>
-                        <p>下单时间：<span class="order-time value"></span></p>
-                        <div class="action-buttons">
-                            <button class="accept-btn user-btn">接单</button>
-                            <button class="detail-btn user-btn">详情</button>
-                        </div>
-                    </div>
+                <div class="action-buttons">
+                    <button class="accept-btn user-btn">接单</button>
+                    <button class="nav-btn user-btn">导航</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- 历史记录区域 -->
-            <section id="history-orders" style="display: none;">
-                <h2>历史订单（<span id="history-count">0</span>）</h2>
-                <div class="order-list" id="history-orders-list">
-                    <!-- 模板内容 -->
-                    <div class="order-card template" style="display:none;">
-                        <!-- 模板内容 -->
-                        <div class="order-status">
-                            <span class="status-indicator status-pending"></span>
-                            <span class="status-text">待接单</span>
-                        </div>
-                        <h3 class="order-id">订单号：<span class="value"></span></h3>
-                        <p>商家地址：<span class="merchant-address value"></span></p>
-                        <p>客户地址：<span class="customer-address value"></span></p>
-                        <p>下单时间：<span class="order-time value"></span></p>
-                        <div class="action-buttons">
-                            <button class="accept-btn user-btn">接单</button>
-                            <button class="detail-btn user-btn">详情</button>
-                        </div>
-                    </div>
+            <!-- 进行中订单模板 -->
+            <div class="order-card template" id="active-template">
+                <div class="order-status">
+                    <span class="status-indicator status-pending"></span>
+                    <span class="status-text">待接单</span>
                 </div>
-            </section>
-        </main>
-    </div>
+                <h3 class="order-id">订单号：<span class="value"></span></h3>
+                <p>商家地址：<span class="merchant-address value"></span></p>
+                <p>客户地址：<span class="customer-address value"></span></p>
+                <p>下单时间：<span class="order-time value"></span></p>
+                <div class="action-buttons">
+                    <button class="accept-btn user-btn">接单</button>
+                    <button class="detail-btn user-btn">详情</button>
+                </div>
+            </div>
 
-    <!-- JavaScript 功能实现 -->
-    <script>
-        // ==================== 侧边栏功能 ====================
-        (function() {
-            const sidebar = document.querySelector('.sidebar');
-            const menuToggle = document.querySelector('.menu-toggle');
-            const overlay = document.querySelector('.sidebar-overlay');
+            <!-- 历史订单模板 -->
+            <div class="order-card template" id="history-template">
+                <!-- 结构与进行中订单相同 -->
+                <div class="order-status">
+                    <span class="status-indicator status-pending"></span>
+                    <span class="status-text">待接单</span>
+                </div>
+                <h3 class="order-id">订单号：<span class="value"></span></h3>
+                <p>商家地址：<span class="merchant-address value"></span></p>
+                <p>客户地址：<span class="customer-address value"></span></p>
+                <p>下单时间：<span class="order-time value"></span></p>
+                <div class="action-buttons">
+                    <button class="accept-btn user-btn">接单</button>
+                    <button class="detail-btn user-btn">详情</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
 
-            // 切换侧边栏显示状态
-            function toggleSidebar() {
-                sidebar.classList.toggle('active');
-                document.body.classList.toggle('no-scroll'); // 禁止背景滚动
-            }
+<!-- JavaScript 功能实现 -->
+<script>
+    // ==================== 侧边栏功能 ====================
+    (function () {
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const overlay = document.querySelector('.sidebar-overlay');
 
-            // 窗口大小变化时自动调整
-            function handleResize() {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                }
-            }
+        // 切换侧边栏显示状态
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            document.body.classList.toggle('no-scroll'); // 禁止背景滚动
+        }
 
-            // 点击遮罩层关闭侧边栏
-            function closeSidebar(e) {
-                if (e.target === overlay) toggleSidebar();
-            }
-
-            // 事件绑定
-            menuToggle.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
-            window.addEventListener('resize', handleResize);
-            handleResize(); // 初始化执行
-        })();
-
-        // ==================== 订单功能 ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            // 默认加载第一个菜单的内容
-            document.querySelector('[data-type="pending"]').click();
-        });
-
-        // 菜单点击事件处理
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                // 移除所有激活状态
-                document.querySelectorAll('.nav-link').forEach(item => {
-                    item.classList.remove('active');
-                });
-
-                // 设置当前激活状态
-                this.classList.add('active');
-
-                // 获取订单类型
-                const type = this.dataset.type;
-
-                // 加载对应订单
-                loadOrders(type);
-
-                // 更新浏览器地址栏
-                history.pushState({}, '', `?type=${type}`);
-            });
-        });
-
-        // 加载订单数据
-        async function loadOrders(type) {
-            try {
-                // 隐藏所有区域
-                document.querySelectorAll('section').forEach(section => {
-                    section.style.display = 'none';
-                });
-
-                // 显示目标区域
-                const section = document.getElementById(`${type}-orders`);
-                if (section) section.style.display = 'block';
-
-                // 如果数据未加载
-                if (document.getElementById(`${type}-count`).textContent === '0') {
-                    const response = await fetch(`/api/orders/?type=${type}`);
-                    const data = await response.json();
-                    renderOrders(type, data);
-                }
-            } catch (error) {
-                console.error('加载失败:', error);
+        // 窗口大小变化时自动调整
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
             }
         }
 
-        // 渲染订单数据
-        // 修改renderOrders函数
-        function renderOrders(type, data) {
-            const container = document.getElementById(`${type}-orders-list`);
-            const template = container.querySelector('.template');
+        // 点击遮罩层关闭侧边栏
+        function closeSidebar(e) {
+            if (e.target === overlay) toggleSidebar();
+        }
 
-            // 清空旧数据
-            container.querySelectorAll('.order-card:not(.template)').forEach(el => el.remove());
+        // 事件绑定
+        menuToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', closeSidebar);
+        window.addEventListener('resize', handleResize);
+        handleResize(); // 初始化执行
+    })();
 
-            data.forEach(order => {
-                const clone = template.cloneNode(true);
-                clone.style.display = 'block';
+    // ==================== 订单功能 ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        // 默认加载第一个菜单的内容
+        document.querySelector('[data-type="pending"]').click();
+    });
 
-                // 填充订单信息
-                clone.querySelector('.order-id .value').textContent = order.id;
-                clone.querySelector('.merchant-address .value').textContent = order.merchant_address;
-                clone.querySelector('.customer-address .value').textContent = order.customer_address;
-                clone.querySelector('.order-time .value').textContent = order.created_at;
+    // 菜单点击事件处理
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
 
-                // 绑定接单事件
-                if(type === 'pending') {
-                    clone.querySelector('.accept-btn').addEventListener('click', async () => {
-                        const response = await fetch(`/api/orders/${order.id}/accept/`, {
-                            method: 'POST',
-                            /*headers: {
-                                'X-CSRFToken': getCookie('csrftoken')
-                            }*/
-                        });
-                        if(response.ok) {
-                            loadOrders('pending');  // 刷新列表
-                            loadOrders('active');  // 更新进行中列表
-                        }
-                    });
-                }
-
-                container.appendChild(clone);
+            // 移除所有激活状态
+            document.querySelectorAll('.nav-link').forEach(item => {
+                item.classList.remove('active');
             });
 
-            // 更新数量显示
-            document.getElementById(`${type}-count`).textContent = data.length;
-        }
+            // 设置当前激活状态
+            this.classList.add('active');
 
+            // 获取订单类型
+            const type = this.dataset.type;
 
-        // 获取并显示骑手信息
-        async function loadRiderProfile() {
-            try {
-                const response = await fetch('/api/rider/profile/');
-                const data = await response.json();
+            // 加载对应订单
+            loadOrders(type);
 
-                // 更新页面显示
-                document.querySelector('.user-menu span:nth-child(2)').textContent = data.name;
-            } catch (error) {
-                console.error('获取骑手信息失败:', error);
-            }
-        }
-
-        // 更新骑手信息
-        async function updateRiderProfile(newData) {
-            try {
-                const response = await fetch('/api/rider/profile/', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')  // 需要添加CSRF token获取函数
-                    },
-                    body: JSON.stringify(newData)
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('更新失败:', error);
-            }
-        }
-
-        // 初始化加载骑手信息
-        document.addEventListener('DOMContentLoaded', () => {
-            loadRiderProfile();
-            // 默认加载第一个菜单的内容
-            document.querySelector('[data-type="pending"]').click();
+            // 更新浏览器地址栏
+            history.pushState({}, '', `?type=${type}`);
         });
-    </script>
+    });
+
+    // 更新骑手信息
+    async function updateRiderProfile(newData) {
+        try {
+            const response = await fetch('/api/rider/profile/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // 需要添加CSRF token获取函数
+                },
+                body: JSON.stringify(newData)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('更新失败:', error);
+        }
+    }
+
+    // 初始化加载骑手信息
+    document.addEventListener('DOMContentLoaded', () => {
+        loadRiderProfile();
+        // 默认加载第一个菜单的内容
+        document.querySelector('[data-type="pending"]').click();
+    });
+
+    // ==================== 修改：renderOrders函数 ====================
+    function renderOrders(type, data) {
+        const container = document.getElementById(`${type}-orders-list`);
+
+        // 防御性校验容器是否存在
+        if (!container) {
+            console.error(`错误：未找到 ID 为 ${type}-orders-list 的容器元素`);
+            return;
+        }
+        container.innerHTML = '';
+
+        // 根据类型选择模板
+        let templateId;
+        switch (type) {
+            case 'pending':
+                templateId = 'pending-template';
+                break;
+            case 'active':
+                templateId = 'active-template';
+                break;
+            case 'history':
+                templateId = 'history-template';
+                break;
+            default:
+                console.error('未知订单类型:', type);
+                return;
+        }
+
+        const template = document.getElementById(templateId);
+        if (!template) {
+            console.error(`未找到 ${type} 类型的模板元素`);
+            return;
+        }
+
+        data.forEach(order => {
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+
+            // 公共字段填充
+            clone.querySelector('.order-id .value').textContent = order.id || '无订单号';
+
+            // 根据类型填充字段
+            if (type === 'pending') {
+                clone.querySelector('.customer-address').textContent = order.customer_address || '无地址';
+                const dishesContainer = clone.querySelector('.dishes-items');
+                dishesContainer.innerHTML = '<div class="dish-item">暂无菜品详情</div>';
+            } else {
+                clone.querySelector('.merchant-address').textContent = order.merchant_address || '无商家地址';
+                clone.querySelector('.customer-address').textContent = order.customer_address || '无地址';
+            }
+
+            container.appendChild(clone);
+        });
+
+        // 更新订单计数
+        document.getElementById(`${type}-count`).textContent = data.length;
+    }
+
+    //前端增加数据格式校验
+    async function loadOrders(type) {
+        console.log("加载订单类型:", type);
+        try {
+            // 隐藏所有区域
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // 显示目标区域
+            const section = document.getElementById(`${type}-orders`);
+            if (section) {
+                section.style.display = 'block'; // 关键点：确保显示
+                console.log(`已显示区域：${type}-orders`);
+            }
+
+            // 加载数据
+            const response = await fetch(`/api/orders/?type=${type}`);
+            if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+            const data = await response.json();
+
+            // 数据校验
+            if (!Array.isArray(data)) {
+                console.error('接口返回数据格式错误:', data);
+                return;
+            }
+            if (data.length === 0) {
+                console.log('无订单数据');
+                return;
+            }
+
+            // 渲染订单
+            renderOrders(type, data);
+        } catch (error) {
+            console.error('加载失败:', error);
+        }
+    }
+
+    // 新增：获取Cookie的工具函数
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 新增：loadRiderProfile 函数定义
+    async function loadRiderProfile() {
+        try {
+            const response = await fetch('/api/rider/profile/');
+            const data = await response.json();
+            const nameElement = document.getElementById('rider-name');
+            if (nameElement) {
+                nameElement.textContent = data.name;
+            }
+        } catch (error) {
+            console.error('获取骑手信息失败:', error);
+        }
+    }
+</script>
 </body>
 </html>
 
