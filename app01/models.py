@@ -170,7 +170,7 @@ class Order(models.Model):
         ('canceled', '已取消')
     )
     oid = models.AutoField(db_column='OId', primary_key=True)  # Field name made lowercase.
-    cid = models.ForeignKey(Customer, models.DO_NOTHING, db_column='CId', default=-1)  # Field name made lowercase.
+    cid = models.ForeignKey(Customer, models.DO_NOTHING, db_column='CId')  # Field name made lowercase.
     mid = models.ForeignKey(Merchant, models.DO_NOTHING, db_column='MId')  # Field name made lowercase.2
     rid = models.ForeignKey('Rider', models.DO_NOTHING, db_column='RId', blank=True, null=True)  # Field name made lowercase.
     totalprice = models.DecimalField(db_column='TotalPrice', max_digits=10, decimal_places=2)  # Field name made lowercase.
@@ -186,12 +186,13 @@ class Order(models.Model):
 
 
 class Orderdishes(models.Model):
+    id = models.AutoField(primary_key=True)  # 显式添加主键
     oid = models.ForeignKey(Order, models.DO_NOTHING, db_column='OId')
     did = models.ForeignKey(Dishes, models.DO_NOTHING, db_column='DId')
     quantity = models.IntegerField(db_column='Quantity')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'orderdishes'
         unique_together = (('oid', 'did'),)  # 联合唯一约束
 

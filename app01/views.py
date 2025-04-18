@@ -13,8 +13,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from .models import *
 import json
-from django.db.models import Q, Avg
-
+from django.db.models import Q, Avg, Prefetch
 
 
 # 登录相关视图
@@ -401,6 +400,67 @@ def customer_register(request):
             return HttpResponse(f'注册失败: {str(e)}', status=400)
 
     return render(request, 'customerRegistration.html')
+
+
+@login_required
+def customer_orders_api(request):
+    """获取客户订单数据（修复版）"""
+    try:
+        customer = request.user.account.customer
+
+        # 优化查询：预加载关联数据
+        orders = Order.objects.filter(cid=customer) \
+            .select_related('mid', 'rid') \
+            .prefetch_related(
+            Prefetch('orderdishes_set',
+                     queryset=Orderdishes.objects.select_related('did'))
+        )
+
+        orders_data = []
+        for order in orders:
+            # 商家信息
+            merchant_info = {
+                "name": order.mid.mname if order.mid else "未知商家",
+                "address": order.mid.maddress if order.mid else ""
+            }
+
+            # 菜品信息
+            items = []
+            for order_dish in order.orderdishes_set.all():
+                items.append({
+                    "id": order_dish.id,  # 使用Orderdishes的主键
+                    "name": order_dish.did.dname,
+                    "quantity": order_dish.quantity,
+                    "unit_price": float(order_dish.did.dprice),
+                    "subtotal": float(order_dish.did.dprice * order_dish.quantity)
+                })
+
+            # 骑手信息
+            rider_info = None
+            if order.rid:
+                rider_info = {
+                    "name": order.rid.rname,
+                    "phone": order.rid.rphone
+                }
+
+            # 订单数据结构
+            order_data = {
+                "oid": order.oid,
+                "status": order.get_status_display(),
+                "total_price": float(order.totalprice),
+                "merchant": merchant_info,
+                "items": items,
+                "rider": rider_info
+            }
+            orders_data.append(order_data)
+
+        return JsonResponse(orders_data, safe=False)
+
+    except Customer.DoesNotExist:
+        return JsonResponse({"error": "客户不存在"}, status=404)
+    except Exception as e:
+        print(f"获取订单失败: {str(e)}")
+        return JsonResponse({"error": "服务器内部错误"}, status=500)
 
 
 def merchant_register(request):

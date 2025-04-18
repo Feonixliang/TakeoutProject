@@ -45,6 +45,9 @@ urlpatterns = [
 
     path('api/merchants/<int:merchant_id>/', views.merchant_detail_api, name='merchant-detail'),
     path('api/merchants/<int:merchant_id>/menu/', views.merchant_menu_api, name='merchant-menu'),
+
+    path('api/customer/orders/', views.customer_orders_api, name='customer-orders'),
+
     path('api/orders/create/', views.create_order, name='create-order'),
 
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),

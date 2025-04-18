@@ -565,6 +565,89 @@
             color: var(--danger-red);
             min-height: 20px;
         }
+
+        /* 订单样式 */
+        .order-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin: 16px 0;
+            padding: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .merchant-info {
+            flex: 1;
+        }
+
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .order-status.pending { background: #FFF4E5; color: #FFB020; }
+        .order-status.active { background: #E8F2FF; color: #4091F7; }
+        .order-status.completed { background: #E6F9F5; color: #14C9A2; }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .total-price {
+            font-weight: 600;
+            color: var(--ctrip-blue);
+        }
+
+        /* 新增筛选按钮样式 */
+        .filter-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background: var(--ctrip-blue);
+            color: var(--text-light);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: var(--ctrip-blue);
+            color: var(--text-light);
+            border-color: var(--ctrip-orange);
+        }
+
     </style>
 </head>
 <body>
@@ -575,7 +658,6 @@
             <ul class="nav-menu">
                 <li class="nav-item"><a href="#" class="nav-link active" data-type="home">首页</a></li>
                 <li class="nav-item"><a href="#" class="nav-link" data-type="orders">订单</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" data-type="favorites">收藏</a></li>
                 <li class="nav-item"><a href="#" class="nav-link" data-type="address">地址管理</a></li>
             </ul>
         </nav>
@@ -654,6 +736,24 @@
 
                     <!-- 新增全局模板 -->
                     <div id="global-templates" style="display: none;">
+
+                        <!-- 订单模板 -->
+                        <div class="order-card template">
+                            <div class="order-header">
+                                <div class="merchant-info">
+                                    <h3 class="merchant-name"></h3>
+                                    <span class="order-status"></span>
+                                </div>
+                                <span class="order-id">订单号：</span>
+                            </div>
+                            <div class="order-body">
+                                <div class="items-list"></div>
+                                <div class="order-footer">
+                                    <div class="total-price">总价：¥<span></span></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="menu-item template">
                             <div class="item-info">
                                 <h3 class="item-name"></h3>
@@ -672,9 +772,32 @@
 
             <!-- 订单内容 -->
             <section id="orders">
-                <h2>我的订单</h2>
-                <div class="order-list">
-                    <!-- 订单卡片 -->
+                <div class="section-header">
+                    <h2>我的订单</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-status="all">全部订单</button>
+                        <button class="filter-btn" data-status="pending">待接单</button>
+                        <button class="filter-btn" data-status="active">配送中</button>
+                        <button class="filter-btn" data-status="completed">已完成</button>
+                    </div>
+                </div>
+                <div class="order-list" id="orders-container">
+                    <!-- 订单模板 -->
+                    <div class="order-card template">
+                        <div class="order-header">
+                            <div class="merchant-info">
+                                <h3 class="merchant-name"></h3>
+                                <span class="order-status"></span>
+                            </div>
+                            <span class="order-id">订单号：</span>
+                        </div>
+                        <div class="order-body">
+                            <div class="items-list"></div>
+                            <div class="order-footer">
+                                <div class="total-price">总价：¥<span></span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -802,6 +925,7 @@
                 if(targetSection) {
                     targetSection.style.display = 'block';
                     targetSection.classList.add('active');
+                    this.loadSectionData(sectionId);
                 }
             }
 
@@ -1140,18 +1264,88 @@
 
             }
 
-            loadSectionData(sectionId) {
-                switch(sectionId) {
+            async loadSectionData(sectionId) {
+                switch (sectionId) {
                     case 'home':
                         this.loadRestaurants();
                         break;
                     case 'orders':
-                        // 加载订单数据
+                        await this.loadOrders();
                         break;
                     case 'favorites':
                         // 加载收藏数据
                         break;
+
                 }
+            }
+
+            // 在loadOrders方法中添加数据校验
+            async loadOrders() {
+                try {
+                    const response = await fetch('/api/customer/orders/');
+                    if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
+
+                    const data = await response.json();
+                    if (!Array.isArray(data)) {
+                        throw new Error('返回数据格式错误');
+                    }
+
+                    this.renderOrders(data);
+                } catch (error) {
+                    console.error('[ERROR] 加载订单失败:', error);
+                    const container = document.querySelector('#orders-container');
+                    container.innerHTML = `
+                        <div class="error-msg">
+                            <p>加载订单失败</p>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+
+
+            // 修改后的renderOrders方法
+            renderOrders(orders) {
+                const container = document.querySelector('#orders-container');
+                container.innerHTML = '';
+                const template = document.querySelector('#global-templates .order-card.template');
+
+                orders.forEach(order => {
+                    const clone = template.cloneNode(true);
+                    clone.classList.remove('template');
+
+                    // 填充基础信息
+                    clone.querySelector('.merchant-name').textContent = order.merchant.name;
+                    clone.querySelector('.order-id').textContent = `订单号：${order.oid}`;
+                    clone.querySelector('.total-price span').textContent = order.total_price.toFixed(2);
+
+                    // 状态显示
+                    const statusElem = clone.querySelector('.order-status');
+                    statusElem.textContent = order.status;
+                    statusElem.className = `order-status ${order.status.toLowerCase()}`;
+
+                    // 填充菜品项
+                    const itemsContainer = clone.querySelector('.items-list');
+                    itemsContainer.innerHTML = order.items.map(item => `
+                        <div class="order-item" data-item-id="${item.id}">
+                            <span>${item.name} ×${item.quantity}</span>
+                            <span>¥${item.subtotal.toFixed(2)}</span>
+                        </div>
+                    `).join('');
+
+                    container.appendChild(clone);
+                });
+            }
+
+
+            filterOrders(status, target) {
+                document.querySelectorAll('#orders .filter-btn').forEach(b => b.classList.remove('active'));
+                target.classList.add('active');
+
+                document.querySelectorAll('#orders .order-card:not(.template)').forEach(order => {
+                    const shouldShow = status === 'all' || order.querySelector('.order-status').classList.contains(status);
+                    order.style.display = shouldShow ? 'block' : 'none';
+                });
             }
         }
 
@@ -1165,7 +1359,7 @@
             }
 
             initCartEvents() {
-                const cartIcon = document.querySelector('.cart-icon');
+                const cartIcon = document.querySelector('a.user-btn.cart-icon');
                 const cartSidebar = document.querySelector('.cart-sidebar');
 
                 // 点击图标切换
@@ -1209,7 +1403,7 @@
 
             // 新增事件解绑方法防止重复绑定
             unbindEvents() {
-                const cartIcon = document.querySelector('.cart-icon');
+                const cartIcon = document.querySelector('a.user-btn.cart-icon');
                 const clone = cartIcon.cloneNode(true);
                 cartIcon.parentNode.replaceChild(clone, cartIcon);
             }
@@ -1348,21 +1542,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.navigation = new Navigation(); // 确保全局可访问
             window.cart = new Cart();
-            new Navigation();
-        });
-
-        // 初始化导航系统
-        document.addEventListener('DOMContentLoaded', () => {
-            new Navigation();
-        });
-
-        // customer.html
-        document.addEventListener('DOMContentLoaded', () => {
-            window.navigation = new Navigation();
             document.getElementById('searchBtn').addEventListener('click', () => {
                 window.navigation.loadMerchants();
+                new Navigation();
             });
         });
+
+
     </script>
 </body>
 </html>
