@@ -48,10 +48,14 @@ urlpatterns = [
 
     path('api/customer/orders/', views.customer_orders_api, name='customer-orders'),
 
+    path('api/orders/<int:order_id>/status/', views.update_order_status, name='update-order-status'),
+
     path('api/orders/create/', views.create_order, name='create-order'),
 
     path('api/rider/profile/', views.rider_profile_api, name='rider-profile-api'),
+
     path('api/orders/<int:order_id>/accept/', views.accept_order, name='accept-order'),
+
     path('api/dishes/', views.dish_api, name='dish_api'),
     path('api/dishes/<int:dish_id>/', views.dish_api, name='dish_detail'),
     path('api/dishes/search/', views.search_dishes, name='search-dishes'),

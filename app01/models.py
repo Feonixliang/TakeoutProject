@@ -167,7 +167,6 @@ class Order(models.Model):
         ('pending', '待接单'),
         ('active', '配送中'),
         ('completed', '已完成'),
-        ('canceled', '已取消')
     )
     oid = models.AutoField(db_column='OId', primary_key=True)  # Field name made lowercase.
     cid = models.ForeignKey(Customer, models.DO_NOTHING, db_column='CId')  # Field name made lowercase.

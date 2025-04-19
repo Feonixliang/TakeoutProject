@@ -122,7 +122,7 @@ def api_orders(request):
     try:
         order_type = request.GET.get("type", "pending")
         if order_type not in ["pending", "active", "history"]:
-            return JsonResponse({"error": "无效的订单类型"}, status=400, ensure_ascii=False)
+            return JsonResponse({"error": "无效的订单类型"}, status=400)
 
         # 基础查询集
         orders = Order.objects.select_related(
@@ -189,29 +189,42 @@ def api_orders(request):
                 "customer": customer_info,
                 "items": items,
                 "total_price": float(order.totalprice),
-                "status": order.get_status_display()  # 显示中文状态
+                "status": order.status
             }
             data.append(order_data)
 
-        return JsonResponse(data, safe=False, ensure_ascii=False)
+        return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400, ensure_ascii=False)
+        return JsonResponse({'error': str(e)}, status=400, json_dumps_params={'ensure_ascii': False})
 
-
+@require_http_methods(["POST"])
 @login_required
 def accept_order(request, order_id):
+    # 检查用户类型
+    if not hasattr(request.user.account, 'rider'):
+        return JsonResponse({'error': '非骑手账户'}, status=403)
     try:
-        order = Order.objects.get(oid=order_id)
-        # 筛选未接取 & 骑手未接订单
-        if order.status == 'pending' and not order.rid:
-            order.rid = request.user.account.rider
+        with transaction.atomic():
+            # 使用行级锁保证并发安全
+            order = Order.objects.select_for_update().get(oid=order_id)
+            rider = request.user.account.rider
+
+            # 验证订单状态
+            if order.status != 'pending' or order.rid:
+                return JsonResponse({'error': '订单已被接取'}, status=400)
+
+            # 更新订单信息
+            order.rid = rider
             order.status = 'active'
             order.save()
+
             return JsonResponse({'status': 'success'})
-        return JsonResponse({'error': '订单不可接'}, status=400)
+
     except Order.DoesNotExist:
         return JsonResponse({'error': '订单不存在'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required
@@ -1010,3 +1023,30 @@ def address_api(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+# views.py
+@login_required
+@require_http_methods(["PUT"])
+def update_order_status(request, order_id):
+    try:
+        order = Order.objects.get(oid=order_id)
+        rider = request.user.account.rider
+
+        if order.rid != rider:
+            return JsonResponse({"error": "无权操作此订单"}, status=403)
+
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        if new_status not in ['completed', 'canceled']:
+            return JsonResponse({"error": "无效状态"}, status=400)
+
+        order.status = new_status
+        order.save()
+        return JsonResponse({"status": "success"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "订单不存在"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
