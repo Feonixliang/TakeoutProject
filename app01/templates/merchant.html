@@ -1244,7 +1244,7 @@
                 // 修正状态处理逻辑
                 const originalStatus = order.status.toLowerCase();
                 const displayStatus = statusMap[originalStatus] || originalStatus;
-                clone.dataset.status = originalStatus; // 保持小写状态
+                clone.dataset.status = originalStatus;
 
                 // 状态显示文本（不影响过滤逻辑）
                 clone.querySelector('.status-text').textContent = {
