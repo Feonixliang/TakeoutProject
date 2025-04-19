@@ -808,7 +808,7 @@ def merchant_orders_api(request):
 
             order_data = {
                 "oid": order.oid,
-                "status": order.get_status_display(),
+                "status": order.status,
                 "total_price": float(order.totalprice),
                 "customer_info": {
                     "name": order.cid.cname,

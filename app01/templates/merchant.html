@@ -1229,30 +1229,56 @@
 
         // 订单渲染方法
         renderOrders(orders) {
+            const statusMap = {
+                "pending": "pending",
+                "active": "active",
+                "completed": "completed",
+                "canceled": "canceled"
+            };
             const container = document.getElementById('orders-container');
             container.innerHTML = '';
 
             orders.forEach(order => {
                 const clone = this.templates.order.cloneNode(true);
-                const statusMap = {
-                    "pending": "待接单",
-                    "active": "配送中",
-                    "completed": "已完成"
-                };
-                clone.classList.remove('template');
-                clone.style.display = 'block';
-                clone.dataset.status = order.status.toLowerCase(); // 状态转为小写
-                clone.dataset.status = statusMap[order.status] || order.status.toLowerCase();
+
+                // 修正状态处理逻辑
+                const originalStatus = order.status.toLowerCase();
+                const displayStatus = statusMap[originalStatus] || originalStatus;
+                clone.dataset.status = originalStatus; // 保持小写状态
+
+                // 状态显示文本（不影响过滤逻辑）
+                clone.querySelector('.status-text').textContent = {
+                    pending: '待接单',
+                    active: '配送中',
+                    completed: '已完成',
+                    canceled: '已取消'
+                }[originalStatus];
+
+
+                // 在renderOrders方法中添加调试输出
+                console.log('Order Status:', originalStatus, 'DOM Status:', clone.dataset.status);
+
+
+                // 填充状态显示
+                clone.querySelector('.status-text').textContent = displayStatus;
+                clone.querySelector('.status-dot').style.backgroundColor = this.getStatusColor(originalStatus);
 
                 // 填充订单数据
                 clone.querySelector('.order-id .value').textContent = order.oid;
-                clone.querySelector('.status-text').textContent = order.status;
                 clone.querySelector('.order-total .total-price').textContent = order.total_price.toFixed(2);
                 clone.querySelector('.customer-phone').textContent = order.customer_info.phone || '未提供';
 
                 // 填充客户信息
                 clone.querySelector('.customer-name').textContent = order.customer_info.name;
                 clone.querySelector('.customer-address').textContent = order.customer_info.address;
+
+
+                clone.classList.remove('template');
+                clone.style.display = 'block';
+                clone.dataset.status = order.status.toLowerCase(); // 状态转为小写
+                clone.dataset.status = statusMap[order.status] || order.status.toLowerCase();
+
+
 
                 // 填充菜品信息
                 const dishesContainer = clone.querySelector('.dishes-items');
@@ -1281,13 +1307,14 @@
             });
 
             // 初始化过滤功能（直接定义函数）
-            const filterOrders = (status, target) => { // 增加target参数
+            const filterOrders = (status, target) => {
                 document.querySelectorAll('#orders .filter-btn').forEach(b =>
                     b.classList.remove('active'));
                 target.classList.add('active');
 
                 document.querySelectorAll('#orders .merchant-order-card').forEach(order => {
-                    const shouldShow = status === 'all' || order.dataset.status === status;
+                    const orderStatus = order.dataset.status;
+                    const shouldShow = status === 'all' || orderStatus === status;
                     order.style.display = shouldShow ? 'block' : 'none';
                 });
             };
@@ -1301,7 +1328,14 @@
         }
 
 
-
+        getStatusColor(status) {
+            const colorMap = {
+                pending: '#FFB020',
+                active: '#4091F7',
+                completed: '#14C9A2'
+            };
+            return colorMap[status.toLowerCase()] || '#999';
+        }
 
         // 获取初始显示模块
         getInitialSection() {
