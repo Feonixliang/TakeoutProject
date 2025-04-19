@@ -459,7 +459,7 @@ def customer_orders_api(request):
             # 订单数据结构
             order_data = {
                 "oid": order.oid,
-                "status": order.get_status_display(),
+                "status": order.status,
                 "total_price": float(order.totalprice),
                 "merchant": merchant_info,
                 "items": items,

@@ -1311,6 +1311,11 @@
                 const template = document.querySelector('#global-templates .order-card.template');
 
                 orders.forEach(order => {
+                    const statusTextMap = {
+                        'pending': '待接单',
+                        'active': '配送中',
+                        'completed': '已完成'
+                    };
                     const clone = template.cloneNode(true);
                     clone.classList.remove('template');
 
@@ -1321,8 +1326,10 @@
 
                     // 状态显示
                     const statusElem = clone.querySelector('.order-status');
-                    statusElem.textContent = order.status;
-                    statusElem.className = `order-status ${order.status.toLowerCase()}`;
+                    statusElem.dataset.status = order.status;
+                    statusElem.textContent = statusTextMap[order.status] || order.status;
+                    statusElem.className = `order-status ${order.status}`;
+
 
                     // 填充菜品项
                     const itemsContainer = clone.querySelector('.items-list');
@@ -1338,15 +1345,23 @@
             }
 
 
+            // 修改filterOrders方法
             filterOrders(status, target) {
                 document.querySelectorAll('#orders .filter-btn').forEach(b => b.classList.remove('active'));
                 target.classList.add('active');
 
+                const selectedStatus = status.toLowerCase();
+
                 document.querySelectorAll('#orders .order-card:not(.template)').forEach(order => {
-                    const shouldShow = status === 'all' || order.querySelector('.order-status').classList.contains(status);
+                    const statusElem = order.querySelector('.order-status');
+                    const orderStatus = statusElem.dataset.status; // 获取原始状态
+
+                    const shouldShow = selectedStatus === 'all' || orderStatus === selectedStatus;
                     order.style.display = shouldShow ? 'block' : 'none';
                 });
             }
+
+
         }
 
         class Cart {
